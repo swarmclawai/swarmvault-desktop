@@ -7,7 +7,7 @@ directories:
   buildResources: resources
 
 files:
-  - dist/**/*
+  - out/**/*
   - node_modules/**/*
   - package.json
 
@@ -28,7 +28,7 @@ win:
   target:
     - target: nsis
       arch: [x64]
-  icon: resources/icon.ico
+  icon: resources/icon.png
 
 nsis:
   oneClick: false
