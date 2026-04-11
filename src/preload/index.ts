@@ -5,7 +5,7 @@ type Unsubscribe = () => void
 
 const api = {
   // Vault operations
-  openVault: () => ipcRenderer.invoke("vault:open"),
+  openVault: (directPath?: string) => ipcRenderer.invoke("vault:open", directPath),
   initVault: (dirPath: string) => ipcRenderer.invoke("vault:init", dirPath),
   getCurrentVault: () => ipcRenderer.invoke("vault:current"),
   closeVault: () => ipcRenderer.invoke("vault:close"),
@@ -21,6 +21,10 @@ const api = {
   // Wiki pages
   listPages: () => ipcRenderer.invoke("vault:list-pages"),
   readPage: (pagePath: string) => ipcRenderer.invoke("vault:read-page", pagePath),
+
+  // Config
+  readConfig: () => ipcRenderer.invoke("vault:read-config"),
+  writeConfig: (content: string) => ipcRenderer.invoke("vault:write-config", content),
 
   // App state
   getRecentVaults: () => ipcRenderer.invoke("app:recent-vaults"),

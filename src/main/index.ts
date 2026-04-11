@@ -1,10 +1,13 @@
-import { app, BrowserWindow, shell } from "electron";
+import { app, BrowserWindow, shell, nativeImage } from "electron";
 import { join } from "path";
 import { registerIpcHandlers } from "./ipc-handlers";
 import { buildMenu } from "./menu";
 import { killAllCommands } from "./cli-runner";
 import { stopGraphServer } from "./graph-server";
 import { initAutoUpdater } from "./updater";
+
+// Set app name (overrides "Electron" in dev mode)
+app.name = "SwarmVault";
 
 // Enforce single-instance: if a second instance launches, focus the existing
 // window instead.
@@ -16,6 +19,8 @@ if (!gotLock) {
 let mainWindow: BrowserWindow | null = null;
 
 function createWindow(): BrowserWindow {
+  const iconPath = join(__dirname, "../../resources/icon.png");
+
   const win = new BrowserWindow({
     width: 1400,
     height: 900,
@@ -23,6 +28,7 @@ function createWindow(): BrowserWindow {
     minHeight: 600,
     titleBarStyle: process.platform === "darwin" ? "hiddenInset" : "default",
     backgroundColor: "#0A0A0A",
+    icon: iconPath,
     show: false,
     webPreferences: {
       preload: join(__dirname, "../preload/index.js"),
@@ -44,8 +50,7 @@ function createWindow(): BrowserWindow {
     return { action: "deny" };
   });
 
-  // Register IPC handlers and build the native menu for this window.
-  registerIpcHandlers(win);
+  // Build the native menu for this window.
   buildMenu(win);
 
   // electron-vite injects the dev server URL or the production file path via
@@ -63,6 +68,18 @@ function createWindow(): BrowserWindow {
 // ---- App lifecycle ----
 
 app.whenReady().then(() => {
+  // Set dock icon (macOS)
+  if (process.platform === "darwin") {
+    const iconPath = join(__dirname, "../../resources/icon.png");
+    try {
+      const icon = nativeImage.createFromPath(iconPath);
+      if (!icon.isEmpty()) app.dock.setIcon(icon);
+    } catch {
+      // Icon not found in dev — ignore
+    }
+  }
+
+  registerIpcHandlers(() => mainWindow);
   mainWindow = createWindow();
   initAutoUpdater(mainWindow);
 });

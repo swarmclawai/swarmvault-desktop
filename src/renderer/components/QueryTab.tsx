@@ -11,10 +11,16 @@ export function QueryTab({ cli }: QueryTabProps) {
   const [queryLines, setQueryLines] = useState<typeof cli.lines>([])
   const resultsRef = useRef<HTMLDivElement>(null)
 
-  // Track output lines for the latest query command
+  const [queryCommandId, setQueryCommandId] = useState<string | null>(null)
+
+  // Filter lines to only those from the current query command
   useEffect(() => {
-    setQueryLines(cli.lines)
-  }, [cli.lines])
+    if (!queryCommandId) return
+    const filtered = cli.lines.filter(
+      (l) => l.id === queryCommandId || l.id === "system"
+    )
+    setQueryLines(filtered)
+  }, [cli.lines, queryCommandId])
 
   // Auto-scroll results
   useEffect(() => {
@@ -27,11 +33,13 @@ export function QueryTab({ cli }: QueryTabProps) {
     e.preventDefault()
     if (!queryText.trim()) return
 
+    setQueryLines([])
     if (exploreMode) {
       await cli.run("explore", [queryText.trim()])
     } else {
       await cli.run("query", [queryText.trim()])
     }
+    setQueryCommandId(cli.commandId)
   }
 
   return (

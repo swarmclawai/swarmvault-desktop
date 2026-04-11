@@ -44,6 +44,7 @@ export function runCommand(
     cwd,
     env: {
       ...process.env,
+      ELECTRON_RUN_AS_NODE: "1",
       FORCE_COLOR: "0",
       NO_UPDATE_NOTIFIER: "1",
     },

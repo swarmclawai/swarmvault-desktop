@@ -101,6 +101,7 @@ export function PagesTab({ cli }: PagesTabProps) {
               className="action-btn truncate cursor-pointer"
               style={{
                 fontSize: 11,
+                padding: "5px 12px",
                 background: selectedPage === p ? "var(--color-accent-soft)" : undefined,
                 color: selectedPage === p ? "var(--color-accent)" : undefined,
               }}

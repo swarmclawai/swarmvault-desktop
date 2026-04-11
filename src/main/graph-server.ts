@@ -78,16 +78,30 @@ export async function startGraphServer(cwd: string): Promise<number> {
       cwd,
       env: {
         ...process.env,
+        ELECTRON_RUN_AS_NODE: "1",
         FORCE_COLOR: "0",
       },
-      stdio: "ignore",
+      stdio: ["ignore", "pipe", "pipe"],
     },
   );
 
   graphProcess = child;
   currentPort = port;
 
-  child.on("exit", () => {
+  // Log graph server output for debugging
+  if (child.stdout) {
+    child.stdout.on("data", (data: Buffer) => {
+      console.log("[graph-server stdout]", data.toString().trim());
+    });
+  }
+  if (child.stderr) {
+    child.stderr.on("data", (data: Buffer) => {
+      console.error("[graph-server stderr]", data.toString().trim());
+    });
+  }
+
+  child.on("exit", (code) => {
+    console.log("[graph-server] exited with code", code);
     if (graphProcess === child) {
       graphProcess = null;
       currentPort = null;

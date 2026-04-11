@@ -1,7 +1,7 @@
 import { ipcMain, dialog, type BrowserWindow } from "electron";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
-import { join } from "path";
+import { join, relative } from "path";
 import Store from "electron-store";
 import { runCommand, killCommand } from "./cli-runner";
 import { startGraphServer, stopGraphServer, getGraphPort } from "./graph-server";
@@ -26,20 +26,29 @@ function addRecentVault(vaultPath: string): void {
  * Register all IPC handlers that the renderer can invoke via the preload
  * bridge.  Call this once during app startup, passing the main BrowserWindow.
  */
-export function registerIpcHandlers(win: BrowserWindow): void {
+export function registerIpcHandlers(getWin: () => BrowserWindow | null): void {
+  const win = () => getWin()!;
+
   // ---- vault management ----
 
-  ipcMain.handle("vault:open", async () => {
-    const result = await dialog.showOpenDialog(win, {
-      properties: ["openDirectory"],
-      title: "Open SwarmVault Workspace",
-    });
+  ipcMain.handle("vault:open", async (_e, directPath?: string) => {
+    let vaultPath: string;
 
-    if (result.canceled || result.filePaths.length === 0) {
-      return { canceled: true };
+    if (directPath) {
+      // Open a specific path without showing a dialog
+      vaultPath = directPath;
+    } else {
+      const result = await dialog.showOpenDialog(win(), {
+        properties: ["openDirectory"],
+        title: "Open SwarmVault Workspace",
+      });
+
+      if (result.canceled || result.filePaths.length === 0) {
+        return { canceled: true };
+      }
+
+      vaultPath = result.filePaths[0];
     }
-
-    const vaultPath = result.filePaths[0];
     const configPath = join(vaultPath, "swarmvault.config.json");
 
     if (!existsSync(configPath)) {
@@ -65,7 +74,7 @@ export function registerIpcHandlers(win: BrowserWindow): void {
 
   ipcMain.handle("vault:init", async (_e, dirPath: string) => {
     if (!dirPath) {
-      const result = await dialog.showOpenDialog(win, {
+      const result = await dialog.showOpenDialog(win(), {
         properties: ["openDirectory"],
         title: "Choose Directory for New Vault",
       });
@@ -75,7 +84,11 @@ export function registerIpcHandlers(win: BrowserWindow): void {
       dirPath = result.filePaths[0];
     }
 
-    const handle = runCommand(win, "init", [], dirPath);
+    const handle = runCommand(win(), "init", [], dirPath);
+    // Wait for the init process to finish before returning
+    await new Promise<void>((resolve) => {
+      handle.process.once("close", () => resolve());
+    });
     return { id: handle.id, path: dirPath };
   });
 
@@ -94,7 +107,7 @@ export function registerIpcHandlers(win: BrowserWindow): void {
     if (!currentVaultPath) {
       return { error: "No vault open" };
     }
-    const handle = runCommand(win, command, args ?? [], currentVaultPath);
+    const handle = runCommand(win(), command, args ?? [], currentVaultPath);
     return { id: handle.id };
   });
 
@@ -138,8 +151,9 @@ export function registerIpcHandlers(win: BrowserWindow): void {
   ipcMain.handle("vault:read-page", async (_e, pagePath: string) => {
     if (!currentVaultPath) return { error: "No vault open" };
     // Prevent path traversal
-    const resolved = join(currentVaultPath, "wiki", pagePath);
-    if (!resolved.startsWith(join(currentVaultPath, "wiki"))) {
+    const wikiBase = join(currentVaultPath, "wiki");
+    const resolved = join(wikiBase, pagePath);
+    if (relative(wikiBase, resolved).startsWith("..")) {
       return { error: "Invalid path" };
     }
     try {
@@ -147,6 +161,32 @@ export function registerIpcHandlers(win: BrowserWindow): void {
       return { content };
     } catch {
       return { error: "Page not found" };
+    }
+  });
+
+  // ---- config file ----
+
+  ipcMain.handle("vault:read-config", async () => {
+    if (!currentVaultPath) return { error: "No vault open" };
+    const configPath = join(currentVaultPath, "swarmvault.config.json");
+    try {
+      const content = await readFile(configPath, "utf-8");
+      return { content, path: configPath };
+    } catch {
+      return { content: "{}", path: configPath };
+    }
+  });
+
+  ipcMain.handle("vault:write-config", async (_e, content: string) => {
+    if (!currentVaultPath) return { error: "No vault open" };
+    const configPath = join(currentVaultPath, "swarmvault.config.json");
+    try {
+      JSON.parse(content); // validate JSON
+      const { writeFile } = await import("fs/promises");
+      await writeFile(configPath, content, "utf-8");
+      return { ok: true };
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : "Invalid JSON" };
     }
   });
 }

@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useVault } from "../hooks/useVault"
 import type { ActiveTab } from "../App"
 import type { useCliRunner } from "../hooks/useCliRunner"
@@ -160,6 +160,11 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
   const { vaultPath, openVault, initVault } = useVault()
   const [watchRunning, setWatchRunning] = useState(false)
 
+  // Reset watchRunning when process exits
+  useEffect(() => {
+    if (!cli.isRunning && watchRunning) setWatchRunning(false)
+  }, [cli.isRunning, watchRunning])
+
   /* Advanced / Graph input state */
   const [blastOpen, setBlastOpen] = useState(false)
   const [blastNode, setBlastNode] = useState("")
@@ -257,28 +262,19 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
           <button className="action-btn" onClick={handleCompile}>
             <IconBuild /> Compile
           </button>
-          <button
-            className={`action-btn${activeTab === "query" ? " active" : ""}`}
-            onClick={() => setActiveTab("query")}
-          >
+          <button className="action-btn" onClick={() => setActiveTab("query")}>
             <IconSearch /> Query
           </button>
           <button className="action-btn" onClick={handleLint}>
             <IconCheck /> Lint
           </button>
-          <button
-            className={`action-btn${watchRunning ? " active" : ""}`}
-            onClick={handleWatch}
-          >
+          <button className="action-btn" onClick={handleWatch}>
             <IconEye /> {watchRunning ? "Stop Watch" : "Watch"}
           </button>
           <button className="action-btn" onClick={handleExport}>
             <IconDownload /> Export
           </button>
-          <button
-            className={`action-btn${activeTab === "query" ? " active" : ""}`}
-            onClick={() => setActiveTab("query")}
-          >
+          <button className="action-btn" onClick={() => setActiveTab("query")}>
             <IconCompass /> Explore
           </button>
         </div>

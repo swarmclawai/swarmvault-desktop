@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useRef } from "react"
+import { useState, useEffect } from "react"
 import { useVault } from "./useVault"
 
 interface GraphServerState {
@@ -10,22 +10,8 @@ interface GraphServerState {
 export function useGraphServer(): GraphServerState {
   const { graphPort, vaultPath } = useVault()
   const [isReady, setIsReady] = useState(false)
-  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
 
   const url = graphPort ? `http://localhost:${graphPort}` : null
-
-  const checkReady = useCallback(async () => {
-    if (!url) {
-      setIsReady(false)
-      return
-    }
-    try {
-      const res = await fetch(url, { method: "HEAD", signal: AbortSignal.timeout(2000) })
-      setIsReady(res.ok)
-    } catch {
-      setIsReady(false)
-    }
-  }, [url])
 
   useEffect(() => {
     if (!url) {
@@ -33,13 +19,30 @@ export function useGraphServer(): GraphServerState {
       return
     }
 
-    checkReady()
-    intervalRef.current = setInterval(checkReady, 3000)
+    // Reset before probing the new URL
+    setIsReady(false)
 
-    return () => {
-      if (intervalRef.current) clearInterval(intervalRef.current)
+    let cancelled = false
+
+    async function check() {
+      for (let i = 0; i < 15; i++) {
+        if (cancelled) return
+        try {
+          await fetch(url!, { mode: "no-cors", signal: AbortSignal.timeout(2000) })
+          // no-cors fetch resolves with opaque response (status 0) but means server is up
+          if (!cancelled) setIsReady(true)
+          return
+        } catch {
+          // not ready yet
+        }
+        await new Promise((r) => setTimeout(r, 1000))
+      }
     }
-  }, [url, checkReady, vaultPath])
+
+    check()
+
+    return () => { cancelled = true }
+  }, [url, vaultPath])
 
   return { port: graphPort, isReady, url }
 }

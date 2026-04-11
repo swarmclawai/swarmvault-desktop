@@ -5,7 +5,8 @@ interface VaultState {
   vaultPath: string | null
   graphPort: number | null
   recentVaults: string[]
-  openVault: () => Promise<void>
+  loading: boolean
+  openVault: (directPath?: string) => Promise<void>
   closeVault: () => Promise<void>
   initVault: () => Promise<void>
   refreshRecent: () => Promise<void>
@@ -17,6 +18,7 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   const [vaultPath, setVaultPath] = useState<string | null>(null)
   const [graphPort, setGraphPort] = useState<number | null>(null)
   const [recentVaults, setRecentVaults] = useState<string[]>([])
+  const [loading, setLoading] = useState(false)
 
   const refreshRecent = useCallback(async () => {
     const vaults = await window.swarmvault.getRecentVaults()
@@ -40,16 +42,22 @@ export function VaultProvider({ children }: { children: ReactNode }) {
     init()
   }, [refreshRecent, refreshPort])
 
-  const openVault = useCallback(async () => {
-    const result = await window.swarmvault.openVault()
-    if (result.error) {
-      console.error("Failed to open vault:", result.error)
-      return
-    }
-    if (result.path) {
-      setVaultPath(result.path)
-      setGraphPort(result.port ?? null)
-      await refreshRecent()
+  const openVault = useCallback(async (directPath?: string) => {
+    setLoading(true)
+    try {
+      const result = await window.swarmvault.openVault(directPath)
+      if (result.canceled) return
+      if (result.error) {
+        console.error("Failed to open vault:", result.error)
+        return
+      }
+      if (result.path) {
+        setVaultPath(result.path)
+        setGraphPort(result.port ?? null)
+        await refreshRecent()
+      }
+    } finally {
+      setLoading(false)
     }
   }, [refreshRecent])
 
@@ -60,17 +68,19 @@ export function VaultProvider({ children }: { children: ReactNode }) {
   }, [])
 
   const initVault = useCallback(async () => {
-    const result = await window.swarmvault.openVault()
-    if (result.error || !result.path) return
-    await window.swarmvault.initVault(result.path)
-    setVaultPath(result.path)
-    await refreshRecent()
-  }, [refreshRecent])
+    // vault:init with empty string triggers its own directory picker
+    const initResult = await window.swarmvault.initVault("")
+    if (!initResult || initResult.canceled || !initResult.path) return
+
+    // vault:init now awaits process completion, so the config file exists
+    await openVault(initResult.path)
+  }, [openVault])
 
   const value: VaultState = {
     vaultPath,
     graphPort,
     recentVaults,
+    loading,
     openVault,
     closeVault,
     initVault,

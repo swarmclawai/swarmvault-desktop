@@ -1,7 +1,26 @@
 import { useVault } from "../hooks/useVault"
 
 export function VaultPicker() {
-  const { openVault, initVault, recentVaults } = useVault()
+  const { openVault, initVault, recentVaults, loading } = useVault()
+
+  if (loading) {
+    return (
+      <div className="h-screen w-screen flex items-center justify-center relative overflow-hidden" style={{ background: "var(--color-bg)" }}>
+        <div className="grid-pattern" />
+        <div className="relative z-10 flex flex-col items-center gap-4 animate-in">
+          <div className="w-12 h-12 flex items-center justify-center" style={{ background: "var(--color-accent)" }}>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0A0A0A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+            </svg>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--color-accent)" }} />
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Opening vault...</span>
+          </div>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="h-screen w-screen flex items-center justify-center relative overflow-hidden" style={{ background: "var(--color-bg)" }}>
@@ -78,7 +97,7 @@ export function VaultPicker() {
                 {recentVaults.map((vp) => (
                   <button
                     key={vp}
-                    onClick={() => openVault()}
+                    onClick={() => openVault(vp)}
                     className="action-btn truncate cursor-pointer"
                     style={{ fontSize: 11 }}
                   >

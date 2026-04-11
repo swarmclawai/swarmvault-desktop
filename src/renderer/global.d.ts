@@ -15,22 +15,27 @@ interface VaultOpenResult {
   path?: string
   port?: number
   error?: string
+  canceled?: boolean
 }
 
 interface SwarmVaultAPI {
   // Vault
-  openVault(): Promise<VaultOpenResult>
-  initVault(dirPath: string): Promise<void>
+  openVault(directPath?: string): Promise<VaultOpenResult>
+  initVault(dirPath: string): Promise<{ path?: string; id?: string; canceled?: boolean }>
   getCurrentVault(): Promise<string | null>
   closeVault(): Promise<void>
 
   // CLI
   runCommand(command: string, args?: string[]): Promise<{ id: string }>
-  killCommand(id: string): Promise<void>
+  killCommand(id: string): Promise<boolean>
 
   // Wiki pages
   listPages(): Promise<{ pages?: string[]; error?: string }>
   readPage(pagePath: string): Promise<{ content?: string; error?: string }>
+
+  // Config
+  readConfig(): Promise<{ content?: string; path?: string; error?: string }>
+  writeConfig(content: string): Promise<{ ok?: boolean; error?: string }>
 
   // Graph
   getGraphPort(): Promise<number | null>

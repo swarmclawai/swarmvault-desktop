@@ -69,9 +69,16 @@ export function useCliRunner(): CliRunner {
       },
     ])
 
-    const { id } = await window.swarmvault.runCommand(command, args)
-    activeId.current = id
-    setCommandId(id)
+    const result = await window.swarmvault.runCommand(command, args)
+    if ("error" in result) {
+      setLines((prev) => [
+        ...prev,
+        { id: "system", stream: "stderr" as const, line: `Error: ${(result as { error: string }).error}`, timestamp: Date.now() },
+      ])
+      return
+    }
+    activeId.current = result.id
+    setCommandId(result.id)
     setIsRunning(true)
   }, [])
 
