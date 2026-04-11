@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+:root {
+  --color-bg: #0A0A0A;
+  --color-raised: #111111;
+  --color-surface: #151515;
+  --color-border: #333333;
+  --color-text: #E0E0E0;
+  --color-text-muted: #888888;
+  --color-text-dim: #555555;
+  --color-accent: #00FF88;
+  --color-accent-soft: rgba(0,255,136,0.15);
+  --color-danger: #FF4444;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', monospace; background: var(--color-bg); color: var(--color-text); }
+::selection { background: rgba(0,255,136,0.3); }
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #555; }

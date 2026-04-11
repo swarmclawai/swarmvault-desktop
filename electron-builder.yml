@@ -1,0 +1,47 @@
+appId: ai.swarmvault.desktop
+productName: SwarmVault
+copyright: "Copyright 2024-2026 SwarmVault"
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**/*
+  - node_modules/**/*
+  - package.json
+
+asarUnpack:
+  - "node_modules/@swarmvaultai/**"
+  - "node_modules/@vscode/tree-sitter-wasm/wasm/**"
+  - "node_modules/tree-sitter-wasms/out/**"
+  - "node_modules/pdfjs-dist/**"
+
+mac:
+  category: public.app-category.developer-tools
+  target:
+    - target: dmg
+      arch: [x64, arm64]
+  icon: resources/icon.icns
+
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: resources/icon.ico
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+
+linux:
+  target:
+    - target: AppImage
+      arch: [x64, arm64]
+    - target: deb
+      arch: [x64, arm64]
+  icon: resources/icon.png
+  category: Development
+
+publish:
+  provider: github
