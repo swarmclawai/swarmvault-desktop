@@ -26,22 +26,13 @@ export function PagesTab({ cli }: PagesTabProps) {
     }
   }, [])
 
-  // Load pages on mount
-  useEffect(() => {
-    loadPages()
-  }, [loadPages])
+  useEffect(() => { loadPages() }, [loadPages])
 
-  // Reload pages after a successful compile
   useEffect(() => {
-    const lastSystemLine = [...cli.lines]
-      .reverse()
-      .find(
-        (l) =>
-          l.stream === "system" && l.line.includes("exited with code 0"),
-      )
-    if (lastSystemLine) {
-      loadPages()
-    }
+    const lastLine = [...cli.lines].reverse().find(
+      (l) => l.stream === "system" && l.line.includes("exited with code 0"),
+    )
+    if (lastLine) loadPages()
   }, [cli.lines, loadPages])
 
   async function handleSelectPage(pagePath: string) {
@@ -49,74 +40,37 @@ export function PagesTab({ cli }: PagesTabProps) {
     setLoadingPage(true)
     try {
       const result = await window.swarmvault.readPage(pagePath)
-      if (result.error) {
-        setPageContent(`Error: ${result.error}`)
-      } else {
-        setPageContent(result.content ?? "")
-      }
+      setPageContent(result.error ? `Error: ${result.error}` : (result.content ?? ""))
     } finally {
       setLoadingPage(false)
     }
   }
 
-  async function handleCompile() {
-    await cli.run("compile")
-  }
-
-  // Don't show empty state during the initial load
   if (initialLoad) {
     return (
-      <div
-        className="flex items-center justify-center h-full"
-        style={{ background: "var(--color-bg)" }}
-      >
-        <span
-          className="text-xs"
-          style={{ color: "var(--color-text-dim)" }}
-        >
-          Loading pages...
-        </span>
+      <div className="flex items-center justify-center h-full" style={{ background: "var(--color-bg)" }}>
+        <div className="flex items-center gap-2">
+          <div className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--color-accent)" }} />
+          <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>Loading pages...</span>
+        </div>
       </div>
     )
   }
 
   if (pages.length === 0) {
     return (
-      <div
-        className="flex items-center justify-center h-full"
-        style={{ background: "var(--color-bg)" }}
-      >
-        <div className="flex flex-col items-center gap-4 max-w-sm text-center">
-          <svg
-            width="40"
-            height="40"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="1.5"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: "var(--color-text-dim)" }}
-          >
+      <div className="flex items-center justify-center h-full" style={{ background: "var(--color-bg)" }}>
+        <div className="flex flex-col items-center gap-5 max-w-xs text-center animate-in">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round" style={{ color: "var(--color-text-dim)" }}>
             <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
             <path d="M14 2v6h6" />
             <path d="M16 13H8M16 17H8M10 9H8" />
           </svg>
-          <p
-            className="text-sm"
-            style={{ color: "var(--color-text-muted)" }}
-          >
-            No wiki pages found. Run compile to generate pages.
-          </p>
-          <button
-            onClick={handleCompile}
-            disabled={cli.isRunning}
-            className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
-            style={{
-              background: "var(--color-accent)",
-              color: "#0A0A0A",
-            }}
-          >
+          <div>
+            <p className="text-xs" style={{ color: "var(--color-text-muted)" }}>No wiki pages found</p>
+            <p className="text-[10px] mt-1" style={{ color: "var(--color-text-dim)" }}>Run compile to generate pages from your sources</p>
+          </div>
+          <button onClick={() => cli.run("compile")} disabled={cli.isRunning} className="btn-primary glow-btn cursor-pointer disabled:opacity-50" style={{ padding: "8px 24px", fontSize: 12 }}>
             {cli.isRunning ? "Compiling..." : "Compile"}
           </button>
         </div>
@@ -126,115 +80,58 @@ export function PagesTab({ cli }: PagesTabProps) {
 
   return (
     <div className="flex h-full" style={{ background: "var(--color-bg)" }}>
-      {/* Page list sidebar */}
-      <div
-        className="shrink-0 border-r overflow-y-auto flex flex-col"
-        style={{
-          width: 240,
-          borderColor: "var(--color-border)",
-          background: "var(--color-raised)",
-        }}
-      >
-        {/* Sidebar header with refresh */}
-        <div
-          className="flex items-center justify-between px-3 py-2 border-b"
-          style={{ borderColor: "var(--color-border)" }}
-        >
-          <span
-            className="text-xs font-medium"
-            style={{ color: "var(--color-text-muted)" }}
-          >
+      {/* Page list */}
+      <div className="shrink-0 flex flex-col overflow-hidden" style={{ width: 220, background: "var(--color-raised)", borderRight: "1px solid var(--color-border)" }}>
+        <div className="flex items-center justify-between px-3 shrink-0" style={{ height: 34, borderBottom: "1px solid var(--color-border)" }}>
+          <span className="text-[10px] uppercase tracking-wider font-semibold" style={{ color: "var(--color-text-dim)" }}>
             Pages ({pages.length})
           </span>
-          <button
-            onClick={loadPages}
-            disabled={loading}
-            className="text-xs cursor-pointer transition-colors disabled:opacity-50"
-            style={{ color: "var(--color-text-dim)" }}
-            title="Refresh page list"
-          >
-            <svg
-              width="14"
-              height="14"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{
-                animation: loading ? "spin 1s linear infinite" : undefined,
-              }}
-            >
+          <button onClick={loadPages} disabled={loading} className="cursor-pointer transition-colors disabled:opacity-50" style={{ color: "var(--color-text-dim)" }} title="Refresh">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ animation: loading ? "spin 1s linear infinite" : undefined }}>
               <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
               <path d="M21 3v5h-5" />
             </svg>
           </button>
         </div>
-
-        {/* Page entries */}
         <div className="flex-1 overflow-y-auto">
-          {pages.map((pagePath) => (
+          {pages.map((p) => (
             <button
-              key={pagePath}
-              onClick={() => handleSelectPage(pagePath)}
-              className="w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer truncate block"
+              key={p}
+              onClick={() => handleSelectPage(p)}
+              className="action-btn truncate cursor-pointer"
               style={{
-                background:
-                  selectedPage === pagePath
-                    ? "var(--color-accent-soft, rgba(255,255,255,0.06))"
-                    : "transparent",
-                color:
-                  selectedPage === pagePath
-                    ? "var(--color-accent)"
-                    : "var(--color-text-muted)",
+                fontSize: 11,
+                background: selectedPage === p ? "var(--color-accent-soft)" : undefined,
+                color: selectedPage === p ? "var(--color-accent)" : undefined,
               }}
-              title={pagePath}
+              title={p}
             >
-              {pagePath}
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="icon shrink-0">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+                <path d="M14 2v6h6" />
+              </svg>
+              <span className="truncate">{p.replace(/\.md$/, "")}</span>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Content area */}
+      {/* Content */}
       <div className="flex-1 flex flex-col overflow-hidden">
         {selectedPage ? (
           <>
-            {/* Breadcrumb */}
-            <div
-              className="px-4 py-2 border-b shrink-0"
-              style={{
-                borderColor: "var(--color-border)",
-                background: "var(--color-raised)",
-              }}
-            >
-              <span
-                className="text-xs font-mono"
-                style={{ color: "var(--color-text-dim)" }}
-              >
-                wiki/{selectedPage}
-              </span>
+            <div className="px-4 shrink-0 flex items-center" style={{ height: 34, borderBottom: "1px solid var(--color-border)", background: "var(--color-raised)" }}>
+              <span className="text-[10px]" style={{ color: "var(--color-text-dim)" }}>wiki/</span>
+              <span className="text-[10px]" style={{ color: "var(--color-text-muted)" }}>{selectedPage}</span>
             </div>
-
-            {/* Page content */}
-            <div className="flex-1 overflow-y-auto p-4">
+            <div className="flex-1 overflow-y-auto p-5">
               {loadingPage ? (
-                <span
-                  className="text-xs"
-                  style={{ color: "var(--color-text-dim)" }}
-                >
-                  Loading...
-                </span>
+                <div className="flex items-center gap-2">
+                  <div className="w-1.5 h-1.5 pulse-dot" style={{ background: "var(--color-accent)" }} />
+                  <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>Loading...</span>
+                </div>
               ) : (
-                <pre
-                  className="text-xs whitespace-pre-wrap"
-                  style={{
-                    color: "var(--color-text)",
-                    fontFamily: "monospace",
-                    margin: 0,
-                  }}
-                >
+                <pre className="text-xs whitespace-pre-wrap leading-relaxed" style={{ color: "var(--color-text)", fontFamily: "var(--font-mono)" }}>
                   {pageContent}
                 </pre>
               )}
@@ -242,12 +139,7 @@ export function PagesTab({ cli }: PagesTabProps) {
           </>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <span
-              className="text-xs"
-              style={{ color: "var(--color-text-dim)" }}
-            >
-              Select a page to view
-            </span>
+            <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>Select a page to view</span>
           </div>
         )}
       </div>

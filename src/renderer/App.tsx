@@ -10,6 +10,9 @@ import { SettingsDialog } from "./components/SettingsDialog"
 
 export type ActiveTab = "graph" | "pages" | "query" | "review" | "sources"
 
+const IS_MAC =
+  typeof navigator !== "undefined" && /Mac/.test(navigator.userAgent)
+
 function AppShell() {
   const { vaultPath, closeVault, openVault } = useVault()
   const cli = useCliRunner()
@@ -41,37 +44,44 @@ function AppShell() {
   }
 
   return (
-    <div className="h-screen w-screen flex flex-col overflow-hidden" style={{ background: "var(--color-bg)" }}>
-      {/* Drag region for macOS traffic lights */}
-      <div
-        className="w-full shrink-0"
-        style={{ height: 36, WebkitAppRegion: "drag" } as React.CSSProperties}
-      />
+    <div className="app-shell">
+      {/* Subtle grid background texture */}
+      <div className="grid-pattern" />
 
-      {/* Main content area */}
-      <div className="flex flex-1 min-h-0">
-        {sidebarVisible && (
-          <Sidebar
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-            cli={cli}
-            onOpenSettings={() => setSettingsOpen(true)}
-          />
-        )}
+      {/* macOS drag region for traffic lights */}
+      {IS_MAC && (
+        <div
+          className="app-drag-region"
+          style={{ WebkitAppRegion: "drag" } as React.CSSProperties}
+        />
+      )}
+
+      {/* Main content: sidebar + main area */}
+      <div className={`app-body${sidebarVisible ? "" : " sidebar-hidden"}`}>
+        <div className={`app-sidebar-slot${sidebarVisible ? "" : " collapsed"}`}>
+          {sidebarVisible && (
+            <Sidebar
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              cli={cli}
+              onOpenSettings={() => setSettingsOpen(true)}
+            />
+          )}
+        </div>
         <MainArea activeTab={activeTab} setActiveTab={setActiveTab} cli={cli} />
       </div>
 
-      {/* Terminal */}
-      <TerminalPanel
-        visible={terminalVisible}
-        onToggle={() => setTerminalVisible((v) => !v)}
-        cli={cli}
-      />
+      {/* Terminal + StatusBar stack at bottom */}
+      <div className="app-bottom">
+        <TerminalPanel
+          visible={terminalVisible}
+          onToggle={() => setTerminalVisible((v) => !v)}
+          cli={cli}
+        />
+        <StatusBar />
+      </div>
 
-      {/* Status bar */}
-      <StatusBar />
-
-      {/* Settings */}
+      {/* Settings dialog */}
       {settingsOpen && <SettingsDialog onClose={() => setSettingsOpen(false)} />}
     </div>
   )

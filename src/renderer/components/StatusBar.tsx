@@ -12,28 +12,17 @@ export function StatusBar() {
     : "No vault"
 
   return (
-    <div
-      className="shrink-0 flex items-center justify-between px-3"
-      style={{
-        height: 24,
-        background: "var(--color-raised)",
-        borderTop: "1px solid var(--color-border)",
-      }}
-    >
+    <div className="status-bar">
       {/* Left: vault path */}
-      <span
-        className="text-xs truncate"
-        style={{ color: "var(--color-text-dim)", fontSize: 10 }}
-        title={vaultPath ?? undefined}
-      >
+      <span className="status-bar-segment truncate" title={vaultPath ?? undefined}>
         {truncatedPath}
       </span>
 
       {/* Center: graph status */}
-      <span className="text-xs flex items-center gap-1.5" style={{ fontSize: 10 }}>
+      <span className="status-bar-segment status-bar-center">
         <span
-          className="inline-block w-1.5 h-1.5 rounded-full"
-          style={{ background: isReady ? "var(--color-accent)" : "var(--color-text-dim)" }}
+          className={`status-dot${isReady ? " pulse-dot" : ""}`}
+          data-ready={isReady}
         />
         <span style={{ color: isReady ? "var(--color-accent)" : "var(--color-text-dim)" }}>
           Graph: {isReady ? `Ready :${port}` : "Offline"}
@@ -41,8 +30,8 @@ export function StatusBar() {
       </span>
 
       {/* Right: version */}
-      <span className="text-xs" style={{ color: "var(--color-text-dim)", fontSize: 10 }}>
-        v0.1.0
+      <span className="status-bar-segment status-bar-right">
+        v0.1.2
       </span>
     </div>
   )

@@ -1,3 +1,4 @@
+import { resolve } from "path";
 import { defineConfig, externalizeDepsPlugin } from "electron-vite";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -14,10 +15,11 @@ export default defineConfig({
     plugins: [externalizeDepsPlugin()],
   },
   renderer: {
+    root: resolve("src/renderer"),
     plugins: [tailwindcss()],
     build: {
       rollupOptions: {
-        input: "src/renderer/index.html",
+        input: resolve("src/renderer/index.html"),
       },
     },
   },

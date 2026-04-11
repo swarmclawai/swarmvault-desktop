@@ -87,21 +87,29 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
     }
   }
 
+  // Collapsed state: thin bar with terminal label and expand chevron
   if (!visible) {
-    // Just show a thin collapsed bar
     return (
       <div
-        className="shrink-0 flex items-center justify-between px-3 cursor-pointer"
+        className="shrink-0 flex items-center px-3 cursor-pointer"
         style={{
           height: 28,
           background: "var(--color-raised)",
           borderTop: "1px solid var(--color-border)",
+          gap: 10,
         }}
         onClick={onToggle}
       >
-        <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>
-          Terminal
+        {/* Terminal chrome dots - small */}
+        <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FF5F57", opacity: 0.6 }} />
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#FEBC2E", opacity: 0.6 }} />
+          <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#28C840", opacity: 0.6 }} />
+        </div>
+        <span style={{ fontSize: 10, color: "var(--color-text-dim)", fontFamily: "var(--font-mono)", letterSpacing: "0.05em" }}>
+          TERMINAL
         </span>
+        <div style={{ flex: 1 }} />
         <svg
           width="14"
           height="14"
@@ -128,24 +136,76 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
         borderTop: "1px solid var(--color-border)",
       }}
     >
-      {/* Header */}
+      {/* Header with terminal chrome dots */}
       <div
-        className="flex items-center justify-between px-3 shrink-0"
+        className="flex items-center shrink-0"
         style={{
           height: 32,
           background: "var(--color-raised)",
           borderBottom: "1px solid var(--color-border)",
+          padding: "0 12px",
+          gap: 10,
         }}
       >
-        <span className="text-xs font-medium" style={{ color: "var(--color-text-muted)" }}>
+        {/* Chrome dots */}
+        <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#FF5F57",
+              border: "0.5px solid rgba(0,0,0,0.12)",
+            }}
+          />
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#FEBC2E",
+              border: "0.5px solid rgba(0,0,0,0.12)",
+            }}
+          />
+          <span
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: "50%",
+              background: "#28C840",
+              border: "0.5px solid rgba(0,0,0,0.12)",
+            }}
+          />
+        </div>
+
+        {/* Terminal label */}
+        <span
+          style={{
+            fontSize: 10,
+            fontFamily: "var(--font-mono)",
+            letterSpacing: "0.05em",
+            color: "var(--color-text-dim)",
+            textTransform: "uppercase",
+          }}
+        >
           Terminal
         </span>
-        <div className="flex items-center gap-2">
+
+        <div style={{ flex: 1 }} />
+
+        {/* Right-side controls */}
+        <div className="flex items-center" style={{ gap: 6 }}>
           {cli.isRunning && (
             <button
               onClick={() => cli.kill()}
-              className="text-xs px-2 py-0.5 rounded transition-colors cursor-pointer"
-              style={{ color: "var(--color-danger)" }}
+              className="action-btn"
+              style={{
+                width: "auto",
+                padding: "2px 8px",
+                fontSize: 10,
+                color: "var(--color-danger)",
+                borderRadius: 4,
+              }}
               title="Kill running process (Ctrl+C)"
             >
               Kill
@@ -153,15 +213,13 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
           )}
           <button
             onClick={() => cli.clear()}
-            className="transition-colors cursor-pointer"
-            style={{ color: "var(--color-text-dim)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-text-muted)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-dim)")}
+            className="action-btn"
+            style={{ width: "auto", padding: "2px 6px", borderRadius: 4 }}
             title="Clear terminal"
           >
             <svg
-              width="14"
-              height="14"
+              width="13"
+              height="13"
               viewBox="0 0 16 16"
               fill="none"
               stroke="currentColor"
@@ -169,20 +227,18 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
               strokeLinecap="round"
               strokeLinejoin="round"
             >
-              <path d="M2 2l12 12M14 2L2 14" />
+              <path d="M2 4h12M5 4V3a1 1 0 011-1h4a1 1 0 011 1v1M6 7v5M10 7v5M3 4l1 9a1 1 0 001 1h6a1 1 0 001-1l1-9" />
             </svg>
           </button>
           <button
             onClick={onToggle}
-            className="transition-colors cursor-pointer"
-            style={{ color: "var(--color-text-dim)" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-text-muted)")}
-            onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-dim)")}
+            className="action-btn"
+            style={{ width: "auto", padding: "2px 6px", borderRadius: 4 }}
             title="Collapse terminal"
           >
             <svg
-              width="14"
-              height="14"
+              width="13"
+              height="13"
               viewBox="0 0 16 16"
               fill="none"
               stroke="currentColor"
@@ -199,21 +255,31 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
       {/* Output area */}
       <div
         ref={scrollRef}
-        className="flex-1 overflow-y-auto px-3 py-2"
+        className="flex-1 overflow-y-auto"
+        style={{ padding: "8px 12px" }}
         onClick={() => inputRef.current?.focus()}
       >
         {cli.lines.length === 0 ? (
-          <div className="text-xs" style={{ color: "var(--color-text-dim)", lineHeight: 1.5 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: "var(--color-text-dim)",
+              fontFamily: "var(--font-mono)",
+              lineHeight: 1.6,
+            }}
+          >
             Ready. Type a command below or use the sidebar actions.
           </div>
         ) : (
           cli.lines.map((line, i) => (
             <div
               key={`${line.timestamp}-${i}`}
-              className="text-xs whitespace-pre-wrap break-all"
               style={{
-                fontFamily: "'JetBrains Mono', monospace",
-                lineHeight: 1.5,
+                fontFamily: "var(--font-mono)",
+                fontSize: 12,
+                lineHeight: 1.6,
+                whiteSpace: "pre-wrap",
+                wordBreak: "break-all",
                 color: lineColor(line.stream),
               }}
             >
@@ -226,16 +292,24 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
       {/* Input area */}
       <form
         onSubmit={handleSubmit}
-        className="shrink-0 flex items-center px-3 gap-0"
+        className="shrink-0 flex items-center"
         style={{
-          height: 32,
+          height: 34,
           background: "var(--color-raised)",
           borderTop: "1px solid var(--color-border)",
+          padding: "0 12px",
+          gap: 0,
         }}
       >
         <span
-          className="text-xs shrink-0 select-none"
-          style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--color-accent)" }}
+          style={{
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
+            color: "var(--color-accent)",
+            textShadow: "0 0 10px rgba(0,255,136,0.4)",
+            flexShrink: 0,
+            userSelect: "none",
+          }}
         >
           $ swarmvault{" "}
         </span>
@@ -248,9 +322,13 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
             setHistoryIndex(-1)
           }}
           onKeyDown={handleKeyDown}
-          className="flex-1 bg-transparent outline-none text-xs"
           style={{
-            fontFamily: "'JetBrains Mono', monospace",
+            flex: 1,
+            background: "transparent",
+            border: "none",
+            outline: "none",
+            fontFamily: "var(--font-mono)",
+            fontSize: 12,
             color: "var(--color-text)",
             caretColor: "var(--color-accent)",
           }}
@@ -258,9 +336,18 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
           autoFocus
         />
         {cli.isRunning && (
-          <span className="text-xs shrink-0" style={{ color: "var(--color-text-dim)" }}>
-            running...
-          </span>
+          <span
+            className="pulse-dot"
+            style={{
+              display: "inline-block",
+              width: 6,
+              height: 6,
+              borderRadius: "50%",
+              background: "var(--color-accent)",
+              flexShrink: 0,
+              marginLeft: 8,
+            }}
+          />
         )}
       </form>
     </div>
