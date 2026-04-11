@@ -18,6 +18,10 @@ const api = {
   // Graph server
   getGraphPort: () => ipcRenderer.invoke("graph:port"),
 
+  // Wiki pages
+  listPages: () => ipcRenderer.invoke("vault:list-pages"),
+  readPage: (pagePath: string) => ipcRenderer.invoke("vault:read-page", pagePath),
+
   // App state
   getRecentVaults: () => ipcRenderer.invoke("app:recent-vaults"),
   clearRecentVaults: () => ipcRenderer.invoke("app:clear-recent-vaults"),

@@ -5,128 +5,164 @@ interface SourceManagerProps {
   cli: ReturnType<typeof useCliRunner>
 }
 
-interface Source {
-  name: string
-  type: string
-  lastSync: string | null
-}
-
 export function SourceManager({ cli }: SourceManagerProps) {
-  const [sources, setSources] = useState<Source[]>([])
-  const [adding, setAdding] = useState(false)
+  const [addInput, setAddInput] = useState("")
+  const [deleteId, setDeleteId] = useState("")
+
+  async function handleListSources() {
+    await cli.run("source", ["list"])
+  }
 
   async function handleAddSource() {
-    setAdding(true)
-    await cli.run("ingest")
-    setAdding(false)
+    if (!addInput.trim()) return
+    await cli.run("source", ["add", addInput.trim()])
+    setAddInput("")
+    await cli.run("source", ["list"])
   }
 
-  async function handleDelete(name: string) {
-    setSources((prev) => prev.filter((s) => s.name !== name))
-    cli.pushSystem(`Removed source: ${name}`)
+  async function handleReloadSources() {
+    await cli.run("source", ["reload"])
   }
 
-  async function handleRefresh() {
-    await cli.run("ingest", ["--status"])
+  async function handleDeleteSource() {
+    if (!deleteId.trim()) return
+    await cli.run("source", ["delete", deleteId.trim()])
+    setDeleteId("")
+    await cli.run("source", ["list"])
+  }
+
+  async function handleGuide() {
+    await cli.run("source", ["guide"])
   }
 
   return (
     <div className="h-full overflow-y-auto p-4" style={{ background: "var(--color-bg)" }}>
-      <div className="max-w-2xl mx-auto flex flex-col gap-4">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
-            Sources
+      <div className="max-w-2xl mx-auto flex flex-col gap-6">
+        {/* Quick Actions */}
+        <section className="flex flex-col gap-3">
+          <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-text-dim)" }}>
+            Quick Actions
           </h2>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <button
-              onClick={handleRefresh}
-              className="px-3 py-1.5 rounded text-xs font-medium border transition-colors cursor-pointer"
+              onClick={handleListSources}
+              disabled={cli.isRunning}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+              style={{ background: "var(--color-accent)", color: "#0A0A0A" }}
+            >
+              List Sources
+            </button>
+            <button
+              onClick={handleReloadSources}
+              disabled={cli.isRunning}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 border"
               style={{
                 background: "transparent",
                 color: "var(--color-text-muted)",
                 borderColor: "var(--color-border)",
               }}
-              onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-text)")}
-              onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-muted)")}
             >
-              Refresh
+              Reload Sources
             </button>
             <button
-              onClick={handleAddSource}
-              disabled={adding}
-              className="px-3 py-1.5 rounded text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
-              style={{ background: "var(--color-accent)", color: "#0A0A0A" }}
+              onClick={handleGuide}
+              disabled={cli.isRunning}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50 border"
+              style={{
+                background: "transparent",
+                color: "var(--color-text-muted)",
+                borderColor: "var(--color-border)",
+              }}
             >
-              {adding ? "Adding..." : "Add Source"}
+              Guide
             </button>
           </div>
-        </div>
+        </section>
 
-        {/* Source list */}
-        {sources.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 gap-4">
-            <svg
-              width="40"
-              height="40"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              style={{ color: "var(--color-text-dim)" }}
+        {/* Add Source */}
+        <section
+          className="flex flex-col gap-3 rounded-lg border p-4"
+          style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
+        >
+          <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-text-dim)" }}>
+            Add Source
+          </h2>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={addInput}
+              onChange={(e) => setAddInput(e.target.value)}
+              placeholder="URL or file path"
+              className="flex-1 px-3 py-2 rounded-lg text-xs outline-none transition-colors"
+              style={{
+                background: "var(--color-bg)",
+                color: "var(--color-text)",
+                border: "1px solid var(--color-border)",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-accent)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleAddSource()
+              }}
+            />
+            <button
+              onClick={handleAddSource}
+              disabled={!addInput.trim() || cli.isRunning}
+              className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+              style={{ background: "var(--color-accent)", color: "#0A0A0A" }}
             >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-              No sources added yet
-            </p>
-            <p className="text-xs" style={{ color: "var(--color-text-dim)" }}>
-              Add files and directories to your vault by running ingest
-            </p>
+              Add
+            </button>
           </div>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {sources.map((source) => (
-              <div
-                key={source.name}
-                className="flex items-center justify-between rounded-lg border p-3"
-                style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
-              >
-                <div className="flex flex-col gap-0.5 min-w-0">
-                  <span className="text-xs font-medium truncate" style={{ color: "var(--color-text)" }}>
-                    {source.name}
-                  </span>
-                  <div className="flex items-center gap-2">
-                    <span
-                      className="text-xs px-1.5 py-0.5 rounded"
-                      style={{ background: "var(--color-accent-soft)", color: "var(--color-accent)" }}
-                    >
-                      {source.type}
-                    </span>
-                    {source.lastSync && (
-                      <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>
-                        Last sync: {source.lastSync}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDelete(source.name)}
-                  className="px-2 py-1 rounded text-xs transition-colors cursor-pointer"
-                  style={{ color: "var(--color-text-dim)" }}
-                  onMouseEnter={(e) => (e.currentTarget.style.color = "var(--color-danger)")}
-                  onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-dim)")}
-                >
-                  Delete
-                </button>
-              </div>
-            ))}
+        </section>
+
+        {/* Delete Source */}
+        <section
+          className="flex flex-col gap-3 rounded-lg border p-4"
+          style={{ background: "var(--color-surface)", borderColor: "var(--color-border)" }}
+        >
+          <h2 className="text-xs font-medium uppercase tracking-wide" style={{ color: "var(--color-text-dim)" }}>
+            Delete Source
+          </h2>
+          <div className="flex gap-2 items-center">
+            <input
+              type="text"
+              value={deleteId}
+              onChange={(e) => setDeleteId(e.target.value)}
+              placeholder="Source ID"
+              className="flex-1 px-3 py-2 rounded-lg text-xs outline-none transition-colors"
+              style={{
+                background: "var(--color-bg)",
+                color: "var(--color-text)",
+                border: "1px solid var(--color-border)",
+                fontFamily: "'JetBrains Mono', monospace",
+              }}
+              onFocus={(e) => (e.currentTarget.style.borderColor = "var(--color-accent)")}
+              onBlur={(e) => (e.currentTarget.style.borderColor = "var(--color-border)")}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleDeleteSource()
+              }}
+            />
+            <button
+              onClick={handleDeleteSource}
+              disabled={!deleteId.trim() || cli.isRunning}
+              className="px-3 py-1.5 rounded text-xs font-medium border transition-colors cursor-pointer disabled:opacity-50"
+              style={{
+                background: "transparent",
+                color: "var(--color-danger)",
+                borderColor: "var(--color-danger)",
+              }}
+            >
+              Delete
+            </button>
           </div>
-        )}
+        </section>
+
+        {/* Hint */}
+        <p className="text-xs" style={{ color: "var(--color-text-dim)" }}>
+          Output appears in the terminal panel below.
+        </p>
       </div>
     </div>
   )

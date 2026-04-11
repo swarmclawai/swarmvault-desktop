@@ -111,7 +111,11 @@ export async function startGraphServer(cwd: string): Promise<number> {
  */
 export function stopGraphServer(): void {
   if (graphProcess) {
-    graphProcess.kill("SIGTERM");
+    if (process.platform === "win32") {
+      graphProcess.kill();
+    } else {
+      graphProcess.kill("SIGTERM");
+    }
     graphProcess = null;
     currentPort = null;
   }

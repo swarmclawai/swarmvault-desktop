@@ -1,8 +1,12 @@
 {
   "name": "swarmvault-desktop",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SwarmVault Desktop — local-first knowledge compiler",
   "private": true,
+  "author": {
+    "name": "SwarmVault",
+    "email": "hello@swarmvault.ai"
+  },
   "type": "module",
   "main": "out/main/index.js",
   "scripts": {

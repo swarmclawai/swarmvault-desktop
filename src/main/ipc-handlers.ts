@@ -1,5 +1,6 @@
 import { ipcMain, dialog, type BrowserWindow } from "electron";
 import { existsSync } from "fs";
+import { readdir, readFile } from "fs/promises";
 import { join } from "path";
 import Store from "electron-store";
 import { runCommand, killCommand } from "./cli-runner";
@@ -115,5 +116,37 @@ export function registerIpcHandlers(win: BrowserWindow): void {
 
   ipcMain.handle("app:clear-recent-vaults", () => {
     store.set("recentVaults", []);
+  });
+
+  // ---- wiki pages ----
+
+  ipcMain.handle("vault:list-pages", async () => {
+    if (!currentVaultPath) return { error: "No vault open" };
+    const wikiDir = join(currentVaultPath, "wiki");
+    try {
+      const entries = await readdir(wikiDir, { recursive: true });
+      const pages = entries
+        .filter((e: string) => e.endsWith(".md"))
+        .map((e: string) => e.replace(/\\/g, "/")) // normalize Windows paths
+        .sort();
+      return { pages };
+    } catch {
+      return { pages: [] };
+    }
+  });
+
+  ipcMain.handle("vault:read-page", async (_e, pagePath: string) => {
+    if (!currentVaultPath) return { error: "No vault open" };
+    // Prevent path traversal
+    const resolved = join(currentVaultPath, "wiki", pagePath);
+    if (!resolved.startsWith(join(currentVaultPath, "wiki"))) {
+      return { error: "Invalid path" };
+    }
+    try {
+      const content = await readFile(resolved, "utf-8");
+      return { content };
+    } catch {
+      return { error: "Page not found" };
+    }
   });
 }

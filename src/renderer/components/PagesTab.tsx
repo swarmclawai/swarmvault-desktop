@@ -1,41 +1,91 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import type { useCliRunner } from "../hooks/useCliRunner"
 
 interface PagesTabProps {
   cli: ReturnType<typeof useCliRunner>
 }
 
-interface WikiPage {
-  title: string
-  path: string
-}
-
 export function PagesTab({ cli }: PagesTabProps) {
-  const [pages, setPages] = useState<WikiPage[]>([])
+  const [pages, setPages] = useState<string[]>([])
   const [selectedPage, setSelectedPage] = useState<string | null>(null)
   const [pageContent, setPageContent] = useState<string>("")
   const [loading, setLoading] = useState(false)
+  const [loadingPage, setLoadingPage] = useState(false)
+  const [initialLoad, setInitialLoad] = useState(true)
 
-  // Scan for pages when lines change (after compile)
+  const loadPages = useCallback(async () => {
+    setLoading(true)
+    try {
+      const result = await window.swarmvault.listPages()
+      if (result.pages) {
+        setPages(result.pages)
+      }
+    } finally {
+      setLoading(false)
+      setInitialLoad(false)
+    }
+  }, [])
+
+  // Load pages on mount
+  useEffect(() => {
+    loadPages()
+  }, [loadPages])
+
+  // Reload pages after a successful compile
   useEffect(() => {
     const lastSystemLine = [...cli.lines]
       .reverse()
-      .find((l) => l.stream === "system" && l.line.includes("exited with code 0"))
+      .find(
+        (l) =>
+          l.stream === "system" && l.line.includes("exited with code 0"),
+      )
     if (lastSystemLine) {
-      // After a successful compile, re-check pages
-      // In a full implementation this would parse the compile output
+      loadPages()
     }
-  }, [cli.lines])
+  }, [cli.lines, loadPages])
+
+  async function handleSelectPage(pagePath: string) {
+    setSelectedPage(pagePath)
+    setLoadingPage(true)
+    try {
+      const result = await window.swarmvault.readPage(pagePath)
+      if (result.error) {
+        setPageContent(`Error: ${result.error}`)
+      } else {
+        setPageContent(result.content ?? "")
+      }
+    } finally {
+      setLoadingPage(false)
+    }
+  }
 
   async function handleCompile() {
-    setLoading(true)
     await cli.run("compile")
-    setLoading(false)
+  }
+
+  // Don't show empty state during the initial load
+  if (initialLoad) {
+    return (
+      <div
+        className="flex items-center justify-center h-full"
+        style={{ background: "var(--color-bg)" }}
+      >
+        <span
+          className="text-xs"
+          style={{ color: "var(--color-text-dim)" }}
+        >
+          Loading pages...
+        </span>
+      </div>
+    )
   }
 
   if (pages.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full" style={{ background: "var(--color-bg)" }}>
+      <div
+        className="flex items-center justify-center h-full"
+        style={{ background: "var(--color-bg)" }}
+      >
         <div className="flex flex-col items-center gap-4 max-w-sm text-center">
           <svg
             width="40"
@@ -52,16 +102,22 @@ export function PagesTab({ cli }: PagesTabProps) {
             <path d="M14 2v6h6" />
             <path d="M16 13H8M16 17H8M10 9H8" />
           </svg>
-          <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
-            Compile your vault to generate wiki pages
+          <p
+            className="text-sm"
+            style={{ color: "var(--color-text-muted)" }}
+          >
+            No wiki pages found. Run compile to generate pages.
           </p>
           <button
             onClick={handleCompile}
-            disabled={loading}
+            disabled={cli.isRunning}
             className="px-4 py-2 rounded-lg text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
-            style={{ background: "var(--color-accent)", color: "#0A0A0A" }}
+            style={{
+              background: "var(--color-accent)",
+              color: "#0A0A0A",
+            }}
           >
-            {loading ? "Compiling..." : "Compile"}
+            {cli.isRunning ? "Compiling..." : "Compile"}
           </button>
         </div>
       </div>
@@ -70,38 +126,126 @@ export function PagesTab({ cli }: PagesTabProps) {
 
   return (
     <div className="flex h-full" style={{ background: "var(--color-bg)" }}>
-      {/* Page list */}
+      {/* Page list sidebar */}
       <div
-        className="w-56 shrink-0 border-r overflow-y-auto"
-        style={{ borderColor: "var(--color-border)", background: "var(--color-raised)" }}
+        className="shrink-0 border-r overflow-y-auto flex flex-col"
+        style={{
+          width: 240,
+          borderColor: "var(--color-border)",
+          background: "var(--color-raised)",
+        }}
       >
-        {pages.map((page) => (
-          <button
-            key={page.path}
-            onClick={() => {
-              setSelectedPage(page.path)
-              setPageContent(`Loading ${page.title}...`)
-            }}
-            className="w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer truncate block"
-            style={{
-              background: selectedPage === page.path ? "var(--color-accent-soft)" : "transparent",
-              color: selectedPage === page.path ? "var(--color-accent)" : "var(--color-text-muted)",
-            }}
+        {/* Sidebar header with refresh */}
+        <div
+          className="flex items-center justify-between px-3 py-2 border-b"
+          style={{ borderColor: "var(--color-border)" }}
+        >
+          <span
+            className="text-xs font-medium"
+            style={{ color: "var(--color-text-muted)" }}
           >
-            {page.title}
+            Pages ({pages.length})
+          </span>
+          <button
+            onClick={loadPages}
+            disabled={loading}
+            className="text-xs cursor-pointer transition-colors disabled:opacity-50"
+            style={{ color: "var(--color-text-dim)" }}
+            title="Refresh page list"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                animation: loading ? "spin 1s linear infinite" : undefined,
+              }}
+            >
+              <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8" />
+              <path d="M21 3v5h-5" />
+            </svg>
           </button>
-        ))}
+        </div>
+
+        {/* Page entries */}
+        <div className="flex-1 overflow-y-auto">
+          {pages.map((pagePath) => (
+            <button
+              key={pagePath}
+              onClick={() => handleSelectPage(pagePath)}
+              className="w-full text-left px-3 py-2 text-xs transition-colors cursor-pointer truncate block"
+              style={{
+                background:
+                  selectedPage === pagePath
+                    ? "var(--color-accent-soft, rgba(255,255,255,0.06))"
+                    : "transparent",
+                color:
+                  selectedPage === pagePath
+                    ? "var(--color-accent)"
+                    : "var(--color-text-muted)",
+              }}
+              title={pagePath}
+            >
+              {pagePath}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Content area */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 flex flex-col overflow-hidden">
         {selectedPage ? (
-          <pre className="text-xs whitespace-pre-wrap" style={{ color: "var(--color-text)" }}>
-            {pageContent}
-          </pre>
+          <>
+            {/* Breadcrumb */}
+            <div
+              className="px-4 py-2 border-b shrink-0"
+              style={{
+                borderColor: "var(--color-border)",
+                background: "var(--color-raised)",
+              }}
+            >
+              <span
+                className="text-xs font-mono"
+                style={{ color: "var(--color-text-dim)" }}
+              >
+                wiki/{selectedPage}
+              </span>
+            </div>
+
+            {/* Page content */}
+            <div className="flex-1 overflow-y-auto p-4">
+              {loadingPage ? (
+                <span
+                  className="text-xs"
+                  style={{ color: "var(--color-text-dim)" }}
+                >
+                  Loading...
+                </span>
+              ) : (
+                <pre
+                  className="text-xs whitespace-pre-wrap"
+                  style={{
+                    color: "var(--color-text)",
+                    fontFamily: "monospace",
+                    margin: 0,
+                  }}
+                >
+                  {pageContent}
+                </pre>
+              )}
+            </div>
+          </>
         ) : (
           <div className="flex items-center justify-center h-full">
-            <span className="text-xs" style={{ color: "var(--color-text-dim)" }}>
+            <span
+              className="text-xs"
+              style={{ color: "var(--color-text-dim)" }}
+            >
               Select a page to view
             </span>
           </div>

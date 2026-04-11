@@ -28,6 +28,10 @@ interface SwarmVaultAPI {
   runCommand(command: string, args?: string[]): Promise<{ id: string }>
   killCommand(id: string): Promise<void>
 
+  // Wiki pages
+  listPages(): Promise<{ pages?: string[]; error?: string }>
+  readPage(pagePath: string): Promise<{ content?: string; error?: string }>
+
   // Graph
   getGraphPort(): Promise<number | null>
 

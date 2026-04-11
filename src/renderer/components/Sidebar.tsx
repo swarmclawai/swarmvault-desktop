@@ -3,6 +3,64 @@ import { useVault } from "../hooks/useVault"
 import type { ActiveTab } from "../App"
 import type { useCliRunner } from "../hooks/useCliRunner"
 
+/* ── Advanced section icons ── */
+
+function IconInbox() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M2 9h3.5l1.5 2h2l1.5-2H14" />
+      <path d="M3 3h10a1 1 0 0 1 1 1v8a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z" />
+    </svg>
+  )
+}
+
+function IconGauge() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 14A6 6 0 1 1 8 2a6 6 0 0 1 0 12Z" />
+      <path d="M8 5v3l2 1" />
+    </svg>
+  )
+}
+
+function IconStar() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <path d="M8 2l1.8 3.6L14 6.2l-3 2.9.7 4.1L8 11.3 4.3 13.2l.7-4.1-3-2.9 4.2-.6L8 2Z" />
+    </svg>
+  )
+}
+
+function IconBlast() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="2" />
+      <circle cx="8" cy="8" r="5" />
+      <path d="M8 1v2M8 13v2M1 8h2M13 8h2" />
+    </svg>
+  )
+}
+
+function IconExplainGraph() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="8" cy="8" r="6" />
+      <path d="M6.5 6a1.5 1.5 0 0 1 3 0c0 1-1.5 1.5-1.5 2.5" />
+      <circle cx="8" cy="12" r="0.5" fill="currentColor" />
+    </svg>
+  )
+}
+
+function IconPath() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="3" cy="13" r="1.5" />
+      <circle cx="13" cy="3" r="1.5" />
+      <path d="M4.5 11.5C6 10 10 6 11.5 4.5" />
+    </svg>
+  )
+}
+
 interface SidebarProps {
   activeTab: ActiveTab
   setActiveTab: (tab: ActiveTab) => void
@@ -105,6 +163,15 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
   const { vaultPath, openVault, initVault } = useVault()
   const [watchRunning, setWatchRunning] = useState(false)
 
+  /* Advanced / Graph input state */
+  const [blastOpen, setBlastOpen] = useState(false)
+  const [blastNode, setBlastNode] = useState("")
+  const [explainOpen, setExplainOpen] = useState(false)
+  const [explainTarget, setExplainTarget] = useState("")
+  const [pathOpen, setPathOpen] = useState(false)
+  const [pathFrom, setPathFrom] = useState("")
+  const [pathTo, setPathTo] = useState("")
+
   const vaultName = vaultPath ? vaultPath.split("/").pop() ?? "vault" : "No Vault"
 
   async function handleIngest() {
@@ -131,6 +198,35 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
 
   async function handleExport() {
     await cli.run("graph", ["export"])
+  }
+
+  /* ── Advanced handlers ── */
+
+  async function handleInboxImport() {
+    await cli.run("inbox", ["import"])
+  }
+
+  async function handleBenchmark() {
+    await cli.run("benchmark", [])
+  }
+
+  async function handleGodNodes() {
+    await cli.run("graph", ["god-nodes"])
+  }
+
+  async function handleBlast() {
+    if (!blastNode.trim()) return
+    await cli.run("graph", ["blast", blastNode.trim()])
+  }
+
+  async function handleExplain() {
+    if (!explainTarget.trim()) return
+    await cli.run("graph", ["explain", explainTarget.trim()])
+  }
+
+  async function handleFindPath() {
+    if (!pathFrom.trim() || !pathTo.trim()) return
+    await cli.run("graph", ["path", "--from", pathFrom.trim(), "--to", pathTo.trim()])
   }
 
   return (
@@ -177,6 +273,108 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
         >
           <IconCompass /> Explore
         </button>
+
+        {/* ── Divider ── */}
+        <div className="my-2 border-t" style={{ borderColor: "var(--color-border)" }} />
+
+        {/* ── Advanced ── */}
+        <div className="text-[10px] uppercase tracking-wider px-1 pb-1" style={{ color: "#555" }}>
+          Advanced
+        </div>
+        <button className={`${btnClass} ${btnNormal}`} onClick={handleInboxImport}>
+          <IconInbox /> Inbox Import
+        </button>
+        <button className={`${btnClass} ${btnNormal}`} onClick={handleBenchmark}>
+          <IconGauge /> Benchmark
+        </button>
+
+        {/* ── Divider ── */}
+        <div className="my-2 border-t" style={{ borderColor: "var(--color-border)" }} />
+
+        {/* ── Graph ── */}
+        <div className="text-[10px] uppercase tracking-wider px-1 pb-1" style={{ color: "#555" }}>
+          Graph
+        </div>
+        <button className={`${btnClass} ${btnNormal}`} onClick={handleGodNodes}>
+          <IconStar /> God Nodes
+        </button>
+
+        {/* Blast Radius */}
+        <button className={`${btnClass} ${btnNormal}`} onClick={() => setBlastOpen(!blastOpen)}>
+          <IconBlast /> Blast Radius
+        </button>
+        {blastOpen && (
+          <div className="flex gap-1 px-1">
+            <input
+              type="text"
+              placeholder="node name"
+              value={blastNode}
+              onChange={(e) => setBlastNode(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleBlast()}
+              className="flex-1 min-w-0 px-2 py-1 text-xs rounded border bg-[#111] border-[#333] text-[#ccc] outline-none focus:border-[#00FF88]"
+            />
+            <button
+              onClick={handleBlast}
+              className="px-2 py-1 text-xs rounded border bg-[#151515] border-[#333] text-[#00FF88] hover:bg-[#1a1a1a] cursor-pointer"
+            >
+              Run
+            </button>
+          </div>
+        )}
+
+        {/* Explain */}
+        <button className={`${btnClass} ${btnNormal}`} onClick={() => setExplainOpen(!explainOpen)}>
+          <IconExplainGraph /> Explain
+        </button>
+        {explainOpen && (
+          <div className="flex gap-1 px-1">
+            <input
+              type="text"
+              placeholder="target"
+              value={explainTarget}
+              onChange={(e) => setExplainTarget(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleExplain()}
+              className="flex-1 min-w-0 px-2 py-1 text-xs rounded border bg-[#111] border-[#333] text-[#ccc] outline-none focus:border-[#00FF88]"
+            />
+            <button
+              onClick={handleExplain}
+              className="px-2 py-1 text-xs rounded border bg-[#151515] border-[#333] text-[#00FF88] hover:bg-[#1a1a1a] cursor-pointer"
+            >
+              Run
+            </button>
+          </div>
+        )}
+
+        {/* Find Path */}
+        <button className={`${btnClass} ${btnNormal}`} onClick={() => setPathOpen(!pathOpen)}>
+          <IconPath /> Find Path
+        </button>
+        {pathOpen && (
+          <div className="flex flex-col gap-1 px-1">
+            <div className="flex gap-1">
+              <input
+                type="text"
+                placeholder="from"
+                value={pathFrom}
+                onChange={(e) => setPathFrom(e.target.value)}
+                className="flex-1 min-w-0 px-2 py-1 text-xs rounded border bg-[#111] border-[#333] text-[#ccc] outline-none focus:border-[#00FF88]"
+              />
+              <input
+                type="text"
+                placeholder="to"
+                value={pathTo}
+                onChange={(e) => setPathTo(e.target.value)}
+                className="flex-1 min-w-0 px-2 py-1 text-xs rounded border bg-[#111] border-[#333] text-[#ccc] outline-none focus:border-[#00FF88]"
+              />
+            </div>
+            <button
+              onClick={handleFindPath}
+              className="px-2 py-1 text-xs rounded border bg-[#151515] border-[#333] text-[#00FF88] hover:bg-[#1a1a1a] cursor-pointer"
+            >
+              Run
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Bottom actions */}

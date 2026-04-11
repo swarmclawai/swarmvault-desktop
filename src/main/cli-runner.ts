@@ -103,11 +103,19 @@ export function killCommand(id: string): boolean {
   const handle = activeCommands.get(id);
   if (!handle) return false;
 
-  handle.process.kill("SIGTERM");
+  if (process.platform === "win32") {
+    handle.process.kill();
+  } else {
+    handle.process.kill("SIGTERM");
+  }
 
   const killTimeout = setTimeout(() => {
     try {
-      handle.process.kill("SIGKILL");
+      if (process.platform === "win32") {
+        handle.process.kill();
+      } else {
+        handle.process.kill("SIGKILL");
+      }
     } catch {
       // Process already exited -- nothing to do.
     }
