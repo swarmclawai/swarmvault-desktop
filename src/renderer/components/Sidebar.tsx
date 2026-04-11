@@ -184,7 +184,11 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
   /* ── Handlers ── */
 
   async function handleIngest() {
-    await cli.run("ingest")
+    const result = await window.swarmvault.pickFile()
+    if (result.canceled || !result.paths?.length) return
+    for (const p of result.paths) {
+      await cli.run("ingest", [p])
+    }
   }
 
   async function handleCompile() {
@@ -206,7 +210,7 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
   }
 
   async function handleExport() {
-    await cli.run("graph", ["export"])
+    await cli.run("graph", ["export", "--format", "html"])
   }
 
   async function handleInboxImport() {

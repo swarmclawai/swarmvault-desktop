@@ -17,6 +17,7 @@ const mockApi = {
   clearRecentVaults: async () => {},
   listPages: async () => ({ pages: [] as string[] }),
   readPage: async () => ({ content: "" }),
+  pickFile: async () => ({ canceled: true }),
   readConfig: async () => ({ content: "{}", path: "" }),
   writeConfig: async () => ({ ok: true }),
   onCommandOutput: () => noop,

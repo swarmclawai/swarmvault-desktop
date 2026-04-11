@@ -37,6 +37,9 @@ interface SwarmVaultAPI {
   readConfig(): Promise<{ content?: string; path?: string; error?: string }>
   writeConfig(content: string): Promise<{ ok?: boolean; error?: string }>
 
+  // File picker
+  pickFile(): Promise<{ paths?: string[]; canceled?: boolean }>
+
   // Graph
   getGraphPort(): Promise<number | null>
 

@@ -115,6 +115,17 @@ export function registerIpcHandlers(getWin: () => BrowserWindow | null): void {
     return killCommand(id);
   });
 
+  // ---- file picker ----
+
+  ipcMain.handle("app:pick-file", async () => {
+    const result = await dialog.showOpenDialog(win(), {
+      properties: ["openFile", "openDirectory", "multiSelections"],
+      title: "Select files or directories to ingest",
+    });
+    if (result.canceled || result.filePaths.length === 0) return { canceled: true };
+    return { paths: result.filePaths };
+  });
+
   // ---- graph ----
 
   ipcMain.handle("graph:port", () => {

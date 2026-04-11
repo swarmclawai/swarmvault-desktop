@@ -266,6 +266,11 @@ body {
   animation: fadeIn 0.3s ease forwards;
 }
 
+/* Spin animation */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 /* Pulse dot */
 @keyframes pulse {
   0%, 100% { opacity: 1; }

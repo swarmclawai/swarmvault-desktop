@@ -32,15 +32,33 @@ export function VaultProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     async function init() {
+      // Check if a vault is already open (e.g. from a previous window)
       const current = await window.swarmvault.getCurrentVault()
-      setVaultPath(current)
       if (current) {
+        setVaultPath(current)
         await refreshPort()
+        await refreshRecent()
+        return
       }
-      await refreshRecent()
+
+      // Auto-open the most recent vault
+      const recent = await window.swarmvault.getRecentVaults()
+      setRecentVaults(recent)
+      if (recent.length > 0) {
+        setLoading(true)
+        try {
+          const result = await window.swarmvault.openVault(recent[0])
+          if (result.path) {
+            setVaultPath(result.path)
+            setGraphPort(result.port ?? null)
+          }
+        } finally {
+          setLoading(false)
+        }
+      }
     }
     init()
-  }, [refreshRecent, refreshPort])
+  }, [])
 
   const openVault = useCallback(async (directPath?: string) => {
     setLoading(true)

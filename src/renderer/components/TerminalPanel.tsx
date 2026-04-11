@@ -311,7 +311,7 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
             userSelect: "none",
           }}
         >
-          $ swarmvault{" "}
+          {"$ swarmvault "}
         </span>
         <input
           ref={inputRef}
@@ -336,6 +336,21 @@ export function TerminalPanel({ visible, onToggle, cli }: TerminalPanelProps) {
           autoFocus
         />
         {cli.isRunning && (
+          <span
+            style={{
+              display: "inline-block",
+              width: 12,
+              height: 12,
+              border: "2px solid var(--color-border)",
+              borderTopColor: "var(--color-accent)",
+              borderRadius: "50%",
+              animation: "spin 0.8s linear infinite",
+              flexShrink: 0,
+              marginLeft: 8,
+            }}
+          />
+        )}
+        {!cli.isRunning && (
           <span
             className="pulse-dot"
             style={{

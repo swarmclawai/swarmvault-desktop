@@ -15,6 +15,9 @@ const api = {
     ipcRenderer.invoke("cli:run", command, args),
   killCommand: (id: string) => ipcRenderer.invoke("cli:kill", id),
 
+  // File picker
+  pickFile: () => ipcRenderer.invoke("app:pick-file"),
+
   // Graph server
   getGraphPort: () => ipcRenderer.invoke("graph:port"),
 
