@@ -1,6 +1,6 @@
 {
   "name": "swarmvault-desktop",
-  "version": "0.1.32",
+  "version": "0.1.33",
   "description": "SwarmVault Desktop — local-first knowledge compiler",
   "private": true,
   "author": {
@@ -22,7 +22,9 @@
   "dependencies": {
     "@swarmvaultai/cli": "^0.7.26",
     "electron-store": "^10.0.0",
-    "electron-updater": "^6.3.9"
+    "electron-updater": "^6.3.9",
+    "fast-deep-equal": "^3.1.3",
+    "fast-uri": "^3.0.1"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["electron", "esbuild"]
