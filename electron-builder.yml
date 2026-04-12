@@ -28,11 +28,13 @@ win:
   target:
     - target: nsis
       arch: [x64]
-  icon: resources/icon.png
+  icon: resources/icon.ico
+  forceCodeSigning: false
 
 nsis:
-  oneClick: false
-  allowToChangeInstallationDirectory: true
+  oneClick: true
+  perMachine: false
+  allowElevation: true
 
 linux:
   target:
