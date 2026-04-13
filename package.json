@@ -1,6 +1,6 @@
 {
   "name": "swarmvault-desktop",
-  "version": "0.1.33",
+  "version": "0.1.34",
   "description": "SwarmVault Desktop — local-first knowledge compiler",
   "private": true,
   "author": {
@@ -13,10 +13,13 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "package": "electron-builder",
-    "package:mac": "electron-builder --mac",
-    "package:win": "electron-builder --win",
-    "package:linux": "electron-builder --linux",
+    "prepare:release-app": "node ./scripts/prepare-release-app.mjs",
+    "normalize:release-artifacts": "node ./scripts/normalize-release-artifacts.mjs",
+    "package": "pnpm build && pnpm prepare:release-app && electron-builder && pnpm normalize:release-artifacts",
+    "package:mac": "pnpm build && pnpm prepare:release-app && electron-builder --mac && pnpm normalize:release-artifacts",
+    "package:win": "pnpm build && pnpm prepare:release-app && electron-builder --win && pnpm normalize:release-artifacts",
+    "package:linux": "pnpm build && pnpm prepare:release-app && electron-builder --linux && pnpm normalize:release-artifacts",
+    "smoke:package": "node ./scripts/smoke-packaged-app.mjs",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
@@ -24,7 +27,10 @@
     "electron-store": "^10.0.0",
     "electron-updater": "^6.3.9",
     "fast-deep-equal": "^3.1.3",
-    "fast-uri": "^3.0.1"
+    "fast-uri": "^3.0.1",
+    "json-schema-traverse": "^1.0.0",
+    "punycode": "^2.3.1",
+    "tr46": "^6.0.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": ["electron", "esbuild"]

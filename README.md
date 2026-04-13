@@ -11,11 +11,11 @@ A local-first desktop app for [SwarmVault](https://github.com/swarmclawai/swarmv
 
 | Platform | Architecture | Download |
 |----------|-------------|----------|
-| macOS | Apple Silicon | [SwarmVault-0.1.33-arm64.dmg](https://github.com/swarmclawai/swarmvault-desktop/releases/download/desktop-v0.1.33/SwarmVault-0.1.33-arm64.dmg) |
-| macOS | Intel | [SwarmVault-0.1.33.dmg](https://github.com/swarmclawai/swarmvault-desktop/releases/download/desktop-v0.1.33/SwarmVault-0.1.33.dmg) |
-| Windows | 64-bit | [SwarmVault Setup 0.1.33.exe](https://github.com/swarmclawai/swarmvault-desktop/releases/download/desktop-v0.1.33/SwarmVault.Setup.0.1.33.exe) |
-| Linux | x86_64 | [SwarmVault-0.1.33.AppImage](https://github.com/swarmclawai/swarmvault-desktop/releases/download/desktop-v0.1.33/SwarmVault-0.1.33.AppImage) |
-| Linux | ARM64 | [SwarmVault-0.1.33-arm64.AppImage](https://github.com/swarmclawai/swarmvault-desktop/releases/download/desktop-v0.1.33/SwarmVault-0.1.33-arm64.AppImage) |
+| macOS | Apple Silicon | [SwarmVault-mac-arm64.dmg](https://github.com/swarmclawai/swarmvault-desktop/releases/latest/download/SwarmVault-mac-arm64.dmg) |
+| macOS | Intel | [SwarmVault-mac-x64.dmg](https://github.com/swarmclawai/swarmvault-desktop/releases/latest/download/SwarmVault-mac-x64.dmg) |
+| Windows | 64-bit | [SwarmVault-windows-x64.exe](https://github.com/swarmclawai/swarmvault-desktop/releases/latest/download/SwarmVault-windows-x64.exe) |
+| Linux | x86_64 | [SwarmVault-linux-x64.AppImage](https://github.com/swarmclawai/swarmvault-desktop/releases/latest/download/SwarmVault-linux-x64.AppImage) |
+| Linux | ARM64 | [SwarmVault-linux-arm64.AppImage](https://github.com/swarmclawai/swarmvault-desktop/releases/latest/download/SwarmVault-linux-arm64.AppImage) |
 
 Or visit the [releases page](https://github.com/swarmclawai/swarmvault-desktop/releases) for all versions.
 
@@ -57,6 +57,9 @@ pnpm package
 pnpm package:mac
 pnpm package:win
 pnpm package:linux
+
+# Smoke-test a packaged app from an isolated app.asar
+pnpm smoke:package
 ```
 
 ### Tech Stack

@@ -73,7 +73,9 @@ app.whenReady().then(() => {
     const iconPath = join(__dirname, "../../resources/icon.png");
     try {
       const icon = nativeImage.createFromPath(iconPath);
-      if (!icon.isEmpty()) app.dock.setIcon(icon);
+      if (!icon.isEmpty() && app.dock) {
+        app.dock.setIcon(icon);
+      }
     } catch {
       // Icon not found in dev — ignore
     }

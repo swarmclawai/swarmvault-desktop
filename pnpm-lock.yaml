@@ -23,6 +23,15 @@ importers:
       fast-uri:
         specifier: ^3.0.1
         version: 3.1.0
+      json-schema-traverse:
+        specifier: ^1.0.0
+        version: 1.0.0
+      punycode:
+        specifier: ^2.3.1
+        version: 2.3.1
+      tr46:
+        specifier: ^6.0.0
+        version: 6.0.0
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.1.7
