@@ -1,6 +1,7 @@
-import { cp, mkdtemp, rm } from "fs/promises";
+import assert from "node:assert/strict";
+import { cp, mkdir, mkdtemp, rm } from "fs/promises";
 import { existsSync } from "fs";
-import { execFile, spawn } from "child_process";
+import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { fileURLToPath } from "url";
@@ -9,6 +10,16 @@ const execFileAsync = promisify(execFile);
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, "..");
 const workspaceTmp = path.resolve(appRoot, "..", "tmp");
+const repoRoot = path.resolve(appRoot, "..");
+const pdfFixturePath = path.join(
+  repoRoot,
+  "opensource",
+  "smoke",
+  "fixtures",
+  "tiny-matrix",
+  "docs",
+  "paper.pdf",
+);
 
 const candidateAsars = [
   path.join(appRoot, "release", "mac-arm64", "SwarmVault.app", "Contents", "Resources", "app.asar"),
@@ -27,61 +38,69 @@ function resolveAsarPath() {
   return existing;
 }
 
-function runIsolatedElectron(asarPath) {
-  const electronBin = path.join(appRoot, "node_modules", ".bin", "electron");
-  return new Promise((resolve, reject) => {
-    const child = spawn(electronBin, [asarPath], {
-      cwd: workspaceTmp,
-      env: {
-        ...process.env,
-        ELECTRON_DISABLE_SECURITY_WARNINGS: "1",
-      },
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+function describeArtifact(asarPath) {
+  const normalized = asarPath.replace(/\\/g, "/");
 
-    let output = "";
-    let settled = false;
-
-    const finish = (error) => {
-      if (settled) return;
-      settled = true;
-      child.kill("SIGTERM");
-      setTimeout(() => child.kill("SIGKILL"), 1_000).unref();
-      if (error) {
-        reject(error);
-      } else {
-        resolve(output);
-      }
+  if (normalized.includes("/release/win-unpacked/")) {
+    return {
+      packageName: "@napi-rs/canvas-win32-x64-msvc",
+      binaryName: "skia.win32-x64-msvc.node",
+      canExecuteCli: process.platform === "win32" && process.arch === "x64",
+      label: "Windows x64",
+      executablePath: path.join(path.dirname(path.dirname(asarPath)), "SwarmVault.exe"),
     };
+  }
 
-    const onData = (chunk) => {
-      output += chunk.toString();
-      if (output.includes("App threw an error during load")) {
-        finish(new Error(output.trim()));
-      }
+  if (normalized.includes("/release/linux-arm64-unpacked/")) {
+    return {
+      packageName: "@napi-rs/canvas-linux-arm64-gnu",
+      binaryName: "skia.linux-arm64-gnu.node",
+      canExecuteCli: process.platform === "linux" && process.arch === "arm64",
+      label: "Linux arm64",
+      executablePath: path.join(path.dirname(path.dirname(asarPath)), "swarmvault-desktop"),
     };
+  }
 
-    child.stdout.on("data", onData);
-    child.stderr.on("data", onData);
-    child.on("exit", (code) => {
-      if (settled) return;
-      if (code && code !== 0) {
-        finish(new Error(output.trim() || `Electron exited with code ${code}`));
-        return;
-      }
-      finish();
-    });
-    child.on("error", finish);
+  if (normalized.includes("/release/linux-unpacked/")) {
+    return {
+      packageName: "@napi-rs/canvas-linux-x64-gnu",
+      binaryName: "skia.linux-x64-gnu.node",
+      canExecuteCli: process.platform === "linux" && process.arch === "x64",
+      label: "Linux x64",
+      executablePath: path.join(path.dirname(path.dirname(asarPath)), "swarmvault-desktop"),
+    };
+  }
 
-    setTimeout(() => finish(), 4_000).unref();
-  });
+  if (normalized.includes("/release/mac-arm64/")) {
+    return {
+      packageName: "@napi-rs/canvas-darwin-arm64",
+      binaryName: "skia.darwin-arm64.node",
+      canExecuteCli: process.platform === "darwin" && process.arch === "arm64",
+      label: "macOS arm64",
+      executablePath: path.join(path.dirname(path.dirname(asarPath)), "MacOS", "SwarmVault"),
+    };
+  }
+
+  if (normalized.includes("/release/mac/")) {
+    return {
+      packageName: "@napi-rs/canvas-darwin-x64",
+      binaryName: "skia.darwin-x64.node",
+      canExecuteCli: process.platform === "darwin" && process.arch === "x64",
+      label: "macOS x64",
+      executablePath: path.join(path.dirname(path.dirname(asarPath)), "MacOS", "SwarmVault"),
+    };
+  }
+
+  throw new Error(`Unsupported packaged artifact path: ${asarPath}`);
 }
 
 async function main() {
   const asarPath = resolveAsarPath();
+  const unpackedPath = `${asarPath}.unpacked`;
+  const artifact = describeArtifact(asarPath);
   const smokeRoot = await mkdtemp(path.join(workspaceTmp, "desktop-packaged-smoke-"));
-  const isolatedAsarPath = path.join(smokeRoot, "app.asar");
   const extractedDir = path.join(smokeRoot, "extracted");
+  const workspaceDir = path.join(smokeRoot, "workspace");
   const asarBin = path.join(appRoot, "node_modules", ".bin", "asar");
   const cliEntry = path.join(
     extractedDir,
@@ -91,27 +110,83 @@ async function main() {
     "dist",
     "index.js",
   );
+  const nativeBinaryPath = path.join(
+    unpackedPath,
+    "node_modules",
+    ...artifact.packageName.split("/"),
+    artifact.binaryName,
+  );
+  const packagedCliEntry = path.join(
+    asarPath,
+    "node_modules",
+    "@swarmvaultai",
+    "cli",
+    "dist",
+    "index.js",
+  );
 
   try {
-    await cp(asarPath, isolatedAsarPath);
-    await runIsolatedElectron(isolatedAsarPath);
-
     await execFileAsync(asarBin, ["extract", asarPath, extractedDir], {
       cwd: appRoot,
       maxBuffer: 1024 * 1024 * 32,
     });
 
-    await execFileAsync(process.execPath, [cliEntry, "--help"], {
-      cwd: smokeRoot,
-      env: {
+    if (existsSync(unpackedPath)) {
+      await cp(unpackedPath, extractedDir, {
+        recursive: true,
+        force: true,
+      });
+    }
+
+    assert.ok(
+      existsSync(nativeBinaryPath),
+      `Missing packaged native canvas binary for ${artifact.label}: ${nativeBinaryPath}`,
+    );
+    assert.ok(existsSync(cliEntry), `Missing packaged CLI entry: ${cliEntry}`);
+    assert.ok(
+      existsSync(artifact.executablePath),
+      `Missing packaged executable for ${artifact.label}: ${artifact.executablePath}`,
+    );
+
+    if (artifact.canExecuteCli) {
+      await mkdir(workspaceDir, { recursive: true });
+
+      const runtimeEnv = {
         ...process.env,
+        ELECTRON_RUN_AS_NODE: "1",
         FORCE_COLOR: "0",
         NO_UPDATE_NOTIFIER: "1",
-      },
-      maxBuffer: 1024 * 1024 * 32,
-    });
+      };
 
-    console.log(`Packaged smoke passed for ${path.relative(appRoot, asarPath)}`);
+      await execFileAsync(artifact.executablePath, [packagedCliEntry, "--help"], {
+        cwd: smokeRoot,
+        env: runtimeEnv,
+        maxBuffer: 1024 * 1024 * 32,
+      });
+
+      await execFileAsync(artifact.executablePath, [packagedCliEntry, "--json", "init"], {
+        cwd: workspaceDir,
+        env: runtimeEnv,
+        maxBuffer: 1024 * 1024 * 32,
+      });
+
+      const ingest = await execFileAsync(
+        artifact.executablePath,
+        [packagedCliEntry, "--json", "ingest", pdfFixturePath],
+        {
+          cwd: workspaceDir,
+          env: runtimeEnv,
+          maxBuffer: 1024 * 1024 * 32,
+        },
+      );
+      const parsed = JSON.parse(ingest.stdout);
+      const manifests = parsed.imported ?? parsed.created ?? [];
+      assert.ok(Array.isArray(manifests) && manifests.length > 0, "Packaged PDF ingest did not return manifests");
+    }
+
+    console.log(
+      `Packaged smoke passed for ${path.relative(appRoot, asarPath)} (${artifact.label})`,
+    );
   } finally {
     await rm(smokeRoot, { recursive: true, force: true });
   }

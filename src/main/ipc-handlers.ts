@@ -117,13 +117,41 @@ export function registerIpcHandlers(getWin: () => BrowserWindow | null): void {
 
   // ---- file picker ----
 
-  ipcMain.handle("app:pick-file", async () => {
-    const result = await dialog.showOpenDialog(win(), {
-      properties: ["openFile", "openDirectory", "multiSelections"],
-      title: "Select files or directories to ingest",
+  ipcMain.handle("app:pick-ingest-targets", async () => {
+    const choice = await dialog.showMessageBox(win(), {
+      type: "question",
+      buttons: ["Files", "Folder", "Cancel"],
+      cancelId: 2,
+      defaultId: 0,
+      title: "Choose Ingest Source",
+      message: "What would you like to ingest?",
+      detail: "Pick one or more files, or choose a directory to ingest as a folder.",
+      normalizeAccessKeys: true,
     });
-    if (result.canceled || result.filePaths.length === 0) return { canceled: true };
-    return { paths: result.filePaths };
+
+    if (choice.response === 2) {
+      return { canceled: true };
+    }
+
+    if (choice.response === 0) {
+      const result = await dialog.showOpenDialog(win(), {
+        properties: ["openFile", "multiSelections"],
+        title: "Select files to ingest",
+      });
+      if (result.canceled || result.filePaths.length === 0) {
+        return { canceled: true };
+      }
+      return { mode: "files", paths: result.filePaths };
+    }
+
+    const result = await dialog.showOpenDialog(win(), {
+      properties: ["openDirectory"],
+      title: "Select folder to ingest",
+    });
+    if (result.canceled || result.filePaths.length === 0) {
+      return { canceled: true };
+    }
+    return { mode: "folder", paths: result.filePaths };
   });
 
   // ---- graph ----

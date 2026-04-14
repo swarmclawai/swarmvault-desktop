@@ -6,12 +6,9 @@ const path = require("path");
 const { promisify } = require("util");
 
 const execFileAsync = promisify(execFile);
-const unpackDirs = [
-  "node_modules/@swarmvaultai",
-  "node_modules/@vscode/tree-sitter-wasm/wasm",
-  "node_modules/tree-sitter-wasms/out",
-  "node_modules/pdfjs-dist",
-];
+const unpackDirPattern =
+  "{node_modules/@swarmvaultai/*,node_modules/@napi-rs/*,node_modules/@vscode/tree-sitter-wasm/wasm,node_modules/tree-sitter-wasms/out,node_modules/pdfjs-dist,node_modules/.pnpm/@swarmvaultai+*/node_modules/@swarmvaultai/*,node_modules/.pnpm/@napi-rs+*/node_modules/@napi-rs/*,node_modules/.pnpm/@vscode+tree-sitter-wasm@*/node_modules/@vscode/tree-sitter-wasm/wasm,node_modules/.pnpm/tree-sitter-wasms@*/node_modules/tree-sitter-wasms/out,node_modules/.pnpm/pdfjs-dist@*/node_modules/pdfjs-dist}";
+const unpackPattern = "{*.node,icudtl.dat}";
 
 async function exists(filePath) {
   try {
@@ -55,10 +52,15 @@ exports.default = async function afterPack(context) {
   await rm(appAsarPath, { force: true });
   await rm(`${appAsarPath}.unpacked`, { recursive: true, force: true });
 
-  const args = ["pack", stageDir, appAsarPath];
-  for (const unpackDir of unpackDirs) {
-    args.push("--unpack-dir", unpackDir);
-  }
+  const args = [
+    "pack",
+    "--unpack-dir",
+    unpackDirPattern,
+    "--unpack",
+    unpackPattern,
+    stageDir,
+    appAsarPath,
+  ];
 
   await execFileAsync(asarBin, args, {
     cwd: projectDir,

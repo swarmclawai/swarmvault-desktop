@@ -14,7 +14,10 @@ files:
   - package.json
 
 asarUnpack:
+  - "**/*.node"
+  - "node_modules/@napi-rs/**/icudtl.dat"
   - "node_modules/@swarmvaultai/**"
+  - "node_modules/@napi-rs/**"
   - "node_modules/@vscode/tree-sitter-wasm/wasm/**"
   - "node_modules/tree-sitter-wasms/out/**"
   - "node_modules/pdfjs-dist/**"

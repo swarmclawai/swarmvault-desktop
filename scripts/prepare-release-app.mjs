@@ -52,7 +52,7 @@ async function main() {
   await cp(deployDir, stageDir, {
     recursive: true,
     force: true,
-    dereference: true,
+    verbatimSymlinks: true,
   });
   await cp(path.join(appRoot, "out"), path.join(stageDir, "out"), {
     recursive: true,

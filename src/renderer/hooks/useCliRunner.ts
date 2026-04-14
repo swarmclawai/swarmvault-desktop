@@ -12,6 +12,7 @@ interface CliRunner {
   isRunning: boolean
   commandId: string | null
   run: (command: string, args?: string[]) => Promise<void>
+  runAndWait: (command: string, args?: string[]) => Promise<number | null>
   kill: () => void
   clear: () => void
   pushSystem: (line: string) => void
@@ -22,6 +23,9 @@ export function useCliRunner(): CliRunner {
   const [isRunning, setIsRunning] = useState(false)
   const [commandId, setCommandId] = useState<string | null>(null)
   const activeId = useRef<string | null>(null)
+  const pendingRuns = useRef(
+    new Map<string, { resolve: (code: number | null) => void; reject: (error: Error) => void }>(),
+  )
 
   useEffect(() => {
     const unsubOutput = window.swarmvault.onCommandOutput((data) => {
@@ -37,6 +41,11 @@ export function useCliRunner(): CliRunner {
     })
 
     const unsubExit = window.swarmvault.onCommandExit((data) => {
+      const pending = pendingRuns.current.get(data.id)
+      if (pending) {
+        pendingRuns.current.delete(data.id)
+        pending.resolve(data.code)
+      }
       if (data.id === activeId.current) {
         setIsRunning(false)
         activeId.current = null
@@ -53,6 +62,10 @@ export function useCliRunner(): CliRunner {
     })
 
     return () => {
+      for (const pending of pendingRuns.current.values()) {
+        pending.reject(new Error("CLI runner disposed before command exit"))
+      }
+      pendingRuns.current.clear()
       unsubOutput()
       unsubExit()
     }
@@ -82,6 +95,39 @@ export function useCliRunner(): CliRunner {
     setIsRunning(true)
   }, [])
 
+  const runAndWait = useCallback(
+    async (command: string, args: string[] = []) => {
+      setLines((prev) => [
+        ...prev,
+        {
+          id: "system",
+          stream: "system",
+          line: `$ swarmvault ${command}${args.length ? " " + args.join(" ") : ""}`,
+          timestamp: Date.now(),
+        },
+      ])
+
+      const result = await window.swarmvault.runCommand(command, args)
+      if ("error" in result) {
+        const message = `Error: ${(result as { error: string }).error}`
+        setLines((prev) => [
+          ...prev,
+          { id: "system", stream: "stderr" as const, line: message, timestamp: Date.now() },
+        ])
+        throw new Error(message)
+      }
+
+      activeId.current = result.id
+      setCommandId(result.id)
+      setIsRunning(true)
+
+      return await new Promise<number | null>((resolve, reject) => {
+        pendingRuns.current.set(result.id, { resolve, reject })
+      })
+    },
+    [],
+  )
+
   const kill = useCallback(() => {
     if (activeId.current) {
       window.swarmvault.killCommand(activeId.current)
@@ -99,5 +145,5 @@ export function useCliRunner(): CliRunner {
     ])
   }, [])
 
-  return { lines, isRunning, commandId, run, kill, clear, pushSystem }
+  return { lines, isRunning, commandId, run, runAndWait, kill, clear, pushSystem }
 }

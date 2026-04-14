@@ -11,6 +11,12 @@ interface CommandExit {
   code: number | null
 }
 
+interface IngestTargetPickResult {
+  mode?: "files" | "folder"
+  paths?: string[]
+  canceled?: boolean
+}
+
 interface VaultOpenResult {
   path?: string
   port?: number
@@ -38,7 +44,7 @@ interface SwarmVaultAPI {
   writeConfig(content: string): Promise<{ ok?: boolean; error?: string }>
 
   // File picker
-  pickFile(): Promise<{ paths?: string[]; canceled?: boolean }>
+  pickIngestTargets(): Promise<IngestTargetPickResult>
 
   // Graph
   getGraphPort(): Promise<number | null>

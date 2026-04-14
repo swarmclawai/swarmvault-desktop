@@ -184,10 +184,10 @@ export function Sidebar({ activeTab, setActiveTab, cli, onOpenSettings }: Sideba
   /* ── Handlers ── */
 
   async function handleIngest() {
-    const result = await window.swarmvault.pickFile()
+    const result = await window.swarmvault.pickIngestTargets()
     if (result.canceled || !result.paths?.length) return
     for (const p of result.paths) {
-      await cli.run("ingest", [p])
+      await cli.runAndWait("ingest", [p])
     }
   }
 
