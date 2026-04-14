@@ -1,6 +1,6 @@
 {
   "name": "swarmvault-desktop",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "description": "SwarmVault Desktop — local-first knowledge compiler",
   "private": true,
   "author": {

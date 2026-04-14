@@ -5,12 +5,29 @@ import { execFile } from "child_process";
 import { promisify } from "util";
 import path from "path";
 import { fileURLToPath } from "url";
+import { createRequire } from "module";
 
 const execFileAsync = promisify(execFile);
+const require = createRequire(import.meta.url);
+const asar = require("@electron/asar");
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const appRoot = path.resolve(__dirname, "..");
 const workspaceTmp = path.resolve(appRoot, "..", "tmp");
 const repoRoot = path.resolve(appRoot, "..");
+const requiredRuntimePackages = [
+  "node_modules/electron-store",
+  "node_modules/electron-updater",
+  "node_modules/@swarmvaultai/cli",
+  "node_modules/@swarmvaultai/engine",
+  "node_modules/pdfjs-dist",
+];
+const requiredRuntimePackageManifests = [
+  "node_modules/electron-store/package.json",
+  "node_modules/electron-updater/package.json",
+  "node_modules/@swarmvaultai/cli/package.json",
+  "node_modules/@swarmvaultai/engine/package.json",
+  "node_modules/pdfjs-dist/package.json",
+];
 const pdfFixturePath = path.join(
   repoRoot,
   "opensource",
@@ -94,6 +111,26 @@ function describeArtifact(asarPath) {
   throw new Error(`Unsupported packaged artifact path: ${asarPath}`);
 }
 
+function assertArchiveRuntimePackages(asarPath) {
+  for (const packagePath of requiredRuntimePackages) {
+    let entry;
+    try {
+      entry = asar.statFile(asarPath, packagePath, false);
+    } catch {
+      throw new Error(`Packaged archive is missing ${packagePath}`);
+    }
+    assert.ok(!entry?.link, `Packaged archive stored ${packagePath} as a link stub`);
+  }
+
+  for (const manifestPath of requiredRuntimePackageManifests) {
+    try {
+      asar.statFile(asarPath, manifestPath, false);
+    } catch {
+      throw new Error(`Packaged archive is missing ${manifestPath}`);
+    }
+  }
+}
+
 async function main() {
   const asarPath = resolveAsarPath();
   const unpackedPath = `${asarPath}.unpacked`;
@@ -126,6 +163,8 @@ async function main() {
   );
 
   try {
+    assertArchiveRuntimePackages(asarPath);
+
     await execFileAsync(asarBin, ["extract", asarPath, extractedDir], {
       cwd: appRoot,
       maxBuffer: 1024 * 1024 * 32,
