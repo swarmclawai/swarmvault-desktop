@@ -1,4 +1,4 @@
-import { ipcMain, dialog, type BrowserWindow } from "electron";
+import { app, ipcMain, dialog, type BrowserWindow } from "electron";
 import { existsSync } from "fs";
 import { readdir, readFile } from "fs/promises";
 import { join, relative } from "path";
@@ -168,6 +168,10 @@ export function registerIpcHandlers(getWin: () => BrowserWindow | null): void {
 
   ipcMain.handle("app:clear-recent-vaults", () => {
     store.set("recentVaults", []);
+  });
+
+  ipcMain.handle("app:version", () => {
+    return app.getVersion();
   });
 
   // ---- wiki pages ----

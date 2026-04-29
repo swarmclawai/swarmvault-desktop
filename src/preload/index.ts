@@ -32,6 +32,7 @@ const api = {
   // App state
   getRecentVaults: () => ipcRenderer.invoke("app:recent-vaults"),
   clearRecentVaults: () => ipcRenderer.invoke("app:clear-recent-vaults"),
+  getAppVersion: () => ipcRenderer.invoke("app:version"),
 
   // Event listeners (return cleanup functions)
   onCommandOutput: (

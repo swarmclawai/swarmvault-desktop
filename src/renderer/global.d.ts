@@ -52,6 +52,7 @@ interface SwarmVaultAPI {
   // App state
   getRecentVaults(): Promise<string[]>
   clearRecentVaults(): Promise<void>
+  getAppVersion(): Promise<string>
 
   // Events
   onCommandOutput(callback: (data: CommandOutput) => void): Unsubscribe

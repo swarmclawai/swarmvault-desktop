@@ -1,7 +1,13 @@
+import { useEffect, useState } from "react"
 import { useVault } from "../hooks/useVault"
 
 export function VaultPicker() {
   const { openVault, initVault, recentVaults, loading } = useVault()
+  const [version, setVersion] = useState("")
+
+  useEffect(() => {
+    window.swarmvault.getAppVersion().then(setVersion).catch(() => setVersion(""))
+  }, [])
 
   if (loading) {
     return (
@@ -117,7 +123,7 @@ export function VaultPicker() {
 
         {/* Version */}
         <div className="text-center mt-4">
-          <span className="text-[10px]" style={{ color: "var(--color-text-dim)" }}>v0.1.2</span>
+          <span className="text-[10px]" style={{ color: "var(--color-text-dim)" }}>{version ? `v${version}` : "SwarmVault"}</span>
         </div>
       </div>
     </div>

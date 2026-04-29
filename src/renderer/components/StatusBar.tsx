@@ -1,9 +1,15 @@
+import { useEffect, useState } from "react"
 import { useVault } from "../hooks/useVault"
 import { useGraphServer } from "../hooks/useGraphServer"
 
 export function StatusBar() {
   const { vaultPath } = useVault()
   const { port, isReady } = useGraphServer()
+  const [version, setVersion] = useState("")
+
+  useEffect(() => {
+    window.swarmvault.getAppVersion().then(setVersion).catch(() => setVersion(""))
+  }, [])
 
   const truncatedPath = vaultPath
     ? vaultPath.length > 50
@@ -31,7 +37,7 @@ export function StatusBar() {
 
       {/* Right: version */}
       <span className="status-bar-segment status-bar-right">
-        v0.1.2
+        {version ? `v${version}` : "SwarmVault"}
       </span>
     </div>
   )

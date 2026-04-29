@@ -25,7 +25,7 @@ Or visit the [releases page](https://github.com/swarmclawai/swarmvault-desktop/r
 - **Source management** for ingesting documents, code, URLs, and 30+ other formats
 - **Wiki browser** for reading and navigating compiled pages, entity profiles, and cross-references
 - **Query interface** for searching across your vault
-- **Task ledger and retrieval workflows** powered by SwarmVault 3.0
+- **Health workbench, task ledger, and retrieval workflows** powered by SwarmVault 3.2
 - **Review workflow** for validating and approving compiled output
 - **Built-in terminal** showing real-time CLI output
 - **Auto-updates** from GitHub releases
