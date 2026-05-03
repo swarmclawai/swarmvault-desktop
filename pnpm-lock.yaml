@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@swarmvaultai/cli':
-        specifier: 3.4.0
-        version: 3.4.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
+        specifier: 3.5.0
+        version: 3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
       electron-store:
         specifier: ^10.0.0
         version: 10.1.0
@@ -716,13 +716,13 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@swarmvaultai/cli@3.4.0':
-    resolution: {integrity: sha512-VbKM+5cT6TKi8zyFTUt0ADdIrvKDgALtD2GxI7cNI2xELjwgpgE6BTS1iDx0hyQrzLwFqzjLACjxTKyejiABQA==}
+  '@swarmvaultai/cli@3.5.0':
+    resolution: {integrity: sha512-Y9h17IvqUSji/eWRxb0xT/8D6Sud4mg/+CX8KWsvgKixORc40OUWn7gAqATA50JGZFygAwoy9ozDMB7QBCx9pQ==}
     engines: {node: '>=24.0.0'}
     hasBin: true
 
-  '@swarmvaultai/engine@3.4.0':
-    resolution: {integrity: sha512-UwmHZrLEcvhbOyXSuUo9U8uv828wquh0vAas8X7uc+DM9k35/L0Mqf+76mY4qh09B4Efrlbh0dbFGujHRhjYcQ==}
+  '@swarmvaultai/engine@3.5.0':
+    resolution: {integrity: sha512-mb/7usdqmJ+zQMXUPaOS/Eo19VaaIeROMHnwdNcd3B2gluzJNKowEquA5BxVY9kue8RK0VZ4lcE2LxaWw8MAsg==}
     engines: {node: '>=24.0.0'}
 
   '@szmarczak/http-timer@4.0.6':
@@ -3908,9 +3908,9 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@swarmvaultai/cli@3.4.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
+  '@swarmvaultai/cli@3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
     dependencies:
-      '@swarmvaultai/engine': 3.4.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
+      '@swarmvaultai/engine': 3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
       commander: 14.0.3
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -3927,7 +3927,7 @@ snapshots:
       - vis-data
       - vis-util
 
-  '@swarmvaultai/engine@3.4.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
+  '@swarmvaultai/engine@3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
     dependencies:
       '@asciidoctor/core': 3.0.4
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
