@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@swarmvaultai/cli':
-        specifier: 3.5.0
-        version: 3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
+        specifier: 3.6.0
+        version: 3.6.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
       electron-store:
         specifier: ^10.0.0
         version: 10.1.0
@@ -716,13 +716,13 @@ packages:
     resolution: {integrity: sha512-t09vSN3MdfsyCHoFcTRCH/iUtG7OJ0CsjzB8cjAmKc/va/kIgeDI/TxsigdncE/4be734m0cvIYwNaV4i2XqAw==}
     engines: {node: '>=10'}
 
-  '@swarmvaultai/cli@3.5.0':
-    resolution: {integrity: sha512-Y9h17IvqUSji/eWRxb0xT/8D6Sud4mg/+CX8KWsvgKixORc40OUWn7gAqATA50JGZFygAwoy9ozDMB7QBCx9pQ==}
+  '@swarmvaultai/cli@3.6.0':
+    resolution: {integrity: sha512-5wIHlmmLd9foT3jw4QSYzXU3pUZOLna/lMmTKPDgstG5klYTb+NeZJehuI55mWa86w8FfEjjs0FXCV0kiCj3Bg==}
     engines: {node: '>=24.0.0'}
     hasBin: true
 
-  '@swarmvaultai/engine@3.5.0':
-    resolution: {integrity: sha512-mb/7usdqmJ+zQMXUPaOS/Eo19VaaIeROMHnwdNcd3B2gluzJNKowEquA5BxVY9kue8RK0VZ4lcE2LxaWw8MAsg==}
+  '@swarmvaultai/engine@3.6.0':
+    resolution: {integrity: sha512-MZZGkghgomcbruNI2WEga7lMAGTXoLG8iqPllOdY9Tkr9p9O2bZ4jmgpCbwLJdsFPENLOODsg8BiaK+zHhuCKg==}
     engines: {node: '>=24.0.0'}
 
   '@szmarczak/http-timer@4.0.6':
@@ -858,6 +858,9 @@ packages:
 
   '@types/node@25.6.0':
     resolution: {integrity: sha512-+qIYRKdNYJwY3vRCZMdJbPLJAtGjQBudzZzdzwQYkEPQd+PJGixUL5QfvCLDaULoLv+RhT3LDkwEfKaAkgSmNQ==}
+
+  '@types/pegjs@0.10.6':
+    resolution: {integrity: sha512-eLYXDbZWXh2uxf+w8sXS8d6KSoXTswfps6fvCUuVAGN8eRpfe7h9eSRydxiSJvo9Bf+GzifsDOr9TMQlmJdmkw==}
 
   '@types/plist@3.0.5':
     resolution: {integrity: sha512-E6OCaRmAe4WDmWNsL/9RMqdkkzDCY1etutkflWk4c+AcjDU07Pcz1fQwTX0TQz+Pxqn9i4L1TU3UFpjnrcDgxA==}
@@ -1031,6 +1034,10 @@ packages:
 
   bidi-js@1.0.3:
     resolution: {integrity: sha512-RKshQI1R3YQ+n9YJz2QQ147P66ELpa1FQEg20Dk8oW9t2KgLbpDLLp9aGZ7y8WHSshDknG0bknqGw5/tyCs5tw==}
+
+  big-integer@1.6.52:
+    resolution: {integrity: sha512-QxD8cf2eVqJOOz63z6JIN9BzvVs/dlySa5HGSBH5xtR8dPteIRQnBxxKqkNTiT6jbDTF6jAfrd4oMcND9RGbQg==}
+    engines: {node: '>=0.6'}
 
   binaryextensions@6.11.0:
     resolution: {integrity: sha512-sXnYK/Ij80TO3lcqZVV2YgfKN5QjUWIRk/XSm2J/4bd/lPko3lvk0O4ZppH6m+6hB2/GTu+ptNwVFe1xh+QLQw==}
@@ -2417,6 +2424,10 @@ packages:
 
   node-releases@2.0.37:
     resolution: {integrity: sha512-1h5gKZCF+pO/o3Iqt5Jp7wc9rH3eJJ0+nh/CIoiRwjRxde/hAHyLPXYN4V3CqKAbiZPSeJFSWHmJsbkicta0Eg==}
+
+  node-sql-parser@5.4.0:
+    resolution: {integrity: sha512-jVe6Z61gPcPjCElPZ6j8llB3wnqGcuQzefim1ERsqIakxnEy5JlzV7XKdO1KmacRG5TKwPc4vJTgSRQ0LfkbFw==}
+    engines: {node: '>=8'}
 
   nodemailer@8.0.5:
     resolution: {integrity: sha512-0PF8Yb1yZuQfQbq+5/pZJrtF6WQcjTd5/S4JOHs9PGFxuTqoB/icwuB44pOdURHJbRKX1PPoJZtY7R4VUoCC8w==}
@@ -3908,9 +3919,9 @@ snapshots:
 
   '@sindresorhus/is@4.6.0': {}
 
-  '@swarmvaultai/cli@3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
+  '@swarmvaultai/cli@3.6.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
     dependencies:
-      '@swarmvaultai/engine': 3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
+      '@swarmvaultai/engine': 3.6.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))
       commander: 14.0.3
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -3927,7 +3938,7 @@ snapshots:
       - vis-data
       - vis-util
 
-  '@swarmvaultai/engine@3.5.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
+  '@swarmvaultai/engine@3.6.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)(graphology-types@0.24.8)(keycharm@0.4.0)(uuid@13.0.0)(vis-data@8.0.3(uuid@13.0.0)(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0)))(vis-util@6.0.0(@egjs/hammerjs@2.0.17)(component-emitter@2.0.0))':
     dependencies:
       '@asciidoctor/core': 3.0.4
       '@modelcontextprotocol/sdk': 1.29.0(zod@4.3.6)
@@ -3953,6 +3964,7 @@ snapshots:
       neo4j-driver: 5.28.3
       node-ical: 0.26.0
       node-mbox: 2.0.0
+      node-sql-parser: 5.4.0
       orga: 4.7.1
       pdfjs-dist: 5.6.205
       rtf-parser: 1.3.3
@@ -4095,6 +4107,8 @@ snapshots:
   '@types/node@25.6.0':
     dependencies:
       undici-types: 7.19.2
+
+  '@types/pegjs@0.10.6': {}
 
   '@types/plist@3.0.5':
     dependencies:
@@ -4304,6 +4318,8 @@ snapshots:
   bidi-js@1.0.3:
     dependencies:
       require-from-string: 2.0.2
+
+  big-integer@1.6.52: {}
 
   binaryextensions@6.11.0:
     dependencies:
@@ -5943,6 +5959,11 @@ snapshots:
     optional: true
 
   node-releases@2.0.37: {}
+
+  node-sql-parser@5.4.0:
+    dependencies:
+      '@types/pegjs': 0.10.6
+      big-integer: 1.6.52
 
   nodemailer@8.0.5: {}
 
